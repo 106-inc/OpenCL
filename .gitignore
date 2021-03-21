@@ -1,0 +1,9 @@
+.idea/
+.vscode/
+build/
+BUILD/
+cmake-build-debug/
+FB_BLD/
+BLD_DIR/
+*.o
+CMakeFiles/
