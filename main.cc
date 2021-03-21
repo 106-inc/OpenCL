@@ -3,10 +3,13 @@
 
 int main(void)
 {
+  BS::CLDriver dr;
+  dr.find_devices();
+
   std::vector<int> vec;
   size_t vec_size{};
 
-  std::cin >> vec_size;
+  //std::cin >> vec_size;
 
   vec.resize(vec_size);
 

@@ -1,8 +1,20 @@
 #ifndef __BITON_H__
 #define __BITON_H__
 
-#include <CL/cl.hpp>
+/* Standard io library */
+#include <iostream>
+/*****************************************/
+
+/* std containers */
 #include <vector>
+#include <string>
+/****************************************/
+
+/* OpenCL library */
+#define __CL_ENABLE_EXCEPTIONS
+
+#include <CL/cl.hpp>
+/****************************************/
 
 namespace BS
 {
@@ -11,6 +23,19 @@ class CLDriver final
 {
 private:
 public:
+  void find_devices( void )
+  {
+    std::vector<cl::Device> devs;
+    cl::Platform pl;
+    pl.getDevices(CL_DEVICE_TYPE_ALL, &devs);
+
+    for (auto &&dev : devs)
+    {
+      std::string name;
+      dev.getInfo(CL_DEVICE_NAME, &name);
+      std::cout << name << std::endl;
+    }
+  }
 };
 
 /**
