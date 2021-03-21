@@ -68,7 +68,7 @@ private:
     {
       std::vector<cl::Device> devs;
       pl_devs.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-      for (auto &&dev : pl_devs)
+      for (auto &&dev : devs)
         if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
           devices_.push_back(dev);
     }
