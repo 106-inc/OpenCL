@@ -3,8 +3,7 @@
 
 int main(void)
 {
-  BS::CLDriver dr;
-  dr.find_devices();
+  BS::BTS::driver();
 
   std::vector<int> vec;
   size_t vec_size{};

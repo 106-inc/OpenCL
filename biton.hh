@@ -1,8 +1,9 @@
 #ifndef __BITON_H__
 #define __BITON_H__
 
-/* Standard io library */
+/* Standard io libraries */
 #include <iostream>
+#include <fstream>
 /*****************************************/
 
 /* std containers */
@@ -19,29 +20,58 @@
 namespace BS
 {
 // TODO: здесь явно не всё -- разобраться
-class CLDriver final
+/**
+ * @brief OpenCL driver class
+ * 
+ */
+class BTS final
 {
 private:
+  std::vector<cl::Device> devices_{};
+  
+  std::string src_code{};
+
 public:
-  void find_devices(void)
+
+  BTS(BTS const &) = delete;
+  BTS &operator=(BTS const &) = delete;
+
+  static BTS &driver( void )
   {
-    std::vector<std::vector<cl::Device>> devs;
+    static BTS SingleTone{};
+
+    return SingleTone;
+  }
+
+  bool load_src( const std::string &cl_fname )
+  {
+    std::ifstream src(cl_fname);
+
+    if (!src.is_open())
+      return false;
+
+    src_code = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+
+    return true;
+  }
+
+  void prepare_uranus();
+private:
+
+  BTS()
+  {
     std::vector<cl::Platform> pls;
-
+    std::vector<std::vector<cl::Device>> devs;
     cl::Platform::get(&pls);
-    devs.resize(pls.size());
 
-    for (size_t i = 0, endi = pls.size(); i < endi; ++i)
-      pls[i].getDevices(CL_DEVICE_TYPE_ALL, &devs[i]);
-
-    for (auto &&pl_devs : devs)
+    for (auto &&pl_devs : pls)
     {
-      std::cout << "----------------------------\n";
+      std::vector<cl::Device> devs;
+      pl_devs.getDevices(CL_DEVICE_TYPE_ALL, &devs);
       for (auto &&dev : pl_devs)
-        std::cout << dev.getInfo<CL_DEVICE_NAME>() << std::endl;
-      std::cout << "----------------------------\n";
+        if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+          devices_.push_back(dev);
     }
-    
   }
 };
 
