@@ -25,16 +25,23 @@ private:
 public:
   void find_devices(void)
   {
-    std::vector<cl::Device> devs;
-    cl::Platform pl;
-    pl.getDevices(CL_DEVICE_TYPE_ALL, &devs);
+    std::vector<std::vector<cl::Device>> devs;
+    std::vector<cl::Platform> pls;
 
-    for (auto &&dev : devs)
+    cl::Platform::get(&pls);
+    devs.resize(pls.size());
+
+    for (size_t i = 0, endi = pls.size(); i < endi; ++i)
+      pls[i].getDevices(CL_DEVICE_TYPE_ALL, &devs[i]);
+
+    for (auto &&pl_devs : devs)
     {
-      std::string name;
-      dev.getInfo(CL_DEVICE_NAME, &name);
-      std::cout << name << std::endl;
+      std::cout << "----------------------------\n";
+      for (auto &&dev : pl_devs)
+        std::cout << dev.getInfo<CL_DEVICE_NAME>() << std::endl;
+      std::cout << "----------------------------\n";
     }
+    
   }
 };
 
