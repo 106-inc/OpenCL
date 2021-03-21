@@ -6,8 +6,8 @@
 /*****************************************/
 
 /* std containers */
-#include <vector>
 #include <string>
+#include <vector>
 /****************************************/
 
 /* OpenCL library */
@@ -23,7 +23,7 @@ class CLDriver final
 {
 private:
 public:
-  void find_devices( void )
+  void find_devices(void)
   {
     std::vector<cl::Device> devs;
     cl::Platform pl;
