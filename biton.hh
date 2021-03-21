@@ -55,13 +55,12 @@ public:
     return true;
   }
 
-  void prepare_uranus();
+  void sort( const std::vector<int> & )
 private:
 
   BTS()
   {
     std::vector<cl::Platform> pls;
-    std::vector<std::vector<cl::Device>> devs;
     cl::Platform::get(&pls);
 
     for (auto &&pl_devs : pls)
@@ -74,16 +73,6 @@ private:
     }
   }
 };
-
-/**
- * @brief Bitonic sort function
- *
- * @param[in] vec reference to vector to sort
- */
-void bitonic_sort(std::vector<int> &vec)
-{
-
-} /* End of 'bitonic_sort' function */
-} // namespace BS
+}
 
 #endif // __BITON_H__
