@@ -30,7 +30,7 @@ BTS::BTS(void)
 void BTS::sort(std::vector<int> &vec)
 {
   cl::Context cont{device_};
-  cl::CommandQueue{cont, device_};
+  cl::CommandQueue queue{cont, device_};
 
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
