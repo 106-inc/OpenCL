@@ -27,7 +27,7 @@ namespace BS
 class BTS final
 {
 private:
-  std::vector<cl::Device> devices_{};
+  cl::Device device_{};
   
   std::string src_code{};
 
@@ -43,22 +43,15 @@ public:
     return SingleTone;
   }
 
-  bool load_src( const std::string &cl_fname )
+  void sort( const std::vector<int> &vec )
   {
-    std::ifstream src(cl_fname);
+    cl::Context cont{device_};
+    cl::CommandQueue{cont, device_};
 
-    if (!src.is_open())
-      return false;
-
-    src_code = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
-
-    return true;
   }
-
-  void sort( const std::vector<int> & )
 private:
 
-  BTS()
+  BTS(void)
   {
     std::vector<cl::Platform> pls;
     cl::Platform::get(&pls);
@@ -69,8 +62,23 @@ private:
       pl_devs.getDevices(CL_DEVICE_TYPE_ALL, &devs);
       for (auto &&dev : devs)
         if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
-          devices_.push_back(dev);
+        {
+          device_ = dev;
+          return;
+        }
     }
+  }
+
+  bool load_src( const std::string &cl_fname )
+  {
+    std::ifstream src(cl_fname);
+
+    if (!src.is_open())
+      return false;
+
+    src_code = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+
+    return true;
   }
 };
 }
