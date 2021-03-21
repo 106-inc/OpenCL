@@ -2,7 +2,7 @@
 
 /**
  * @brief Construct a new BTS::BTS object function
- * 
+ *
  */
 BTS::BTS(void)
 {
@@ -24,10 +24,10 @@ BTS::BTS(void)
 
 /**
  * @brief bitonic sort array fucntion
- * 
- * @param[in, out] vec vector to sort 
+ *
+ * @param[in, out] vec vector to sort
  */
-void BTS::sort( std::vector<int> &vec )
+void BTS::sort(std::vector<int> &vec)
 {
   cl::Context cont{device_};
   cl::CommandQueue{cont, device_};
@@ -39,7 +39,6 @@ void BTS::sort( std::vector<int> &vec )
 
   prog.build({device_});
 
-
   cl::Kernel kern{prog, "Bitonic sort"};
 
   // here goes a program
@@ -47,12 +46,12 @@ void BTS::sort( std::vector<int> &vec )
 
 /**
  * @brief Load .cl source code from file
- * 
+ *
  * @param[in] cl_fname name of a file with .cl code
  * @return true if all is ok
  * @return false otherwise
  */
-bool BTS::load_src( const std::string &cl_fname )
+bool BTS::load_src(const std::string &cl_fname)
 {
   std::ifstream src(cl_fname);
 

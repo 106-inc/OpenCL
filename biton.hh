@@ -2,8 +2,8 @@
 #define __BITON_H__
 
 /* Standard io libraries */
-#include <iostream>
 #include <fstream>
+#include <iostream>
 /*****************************************/
 
 /* std containers */
@@ -20,38 +20,37 @@
 // TODO: здесь явно не всё -- разобраться
 /**
  * @brief OpenCL driver class
- * 
+ *
  */
 class BTS final
 {
 private:
   cl::Device device_{};
-  
+
   std::string src_code{};
 
 public:
-
   BTS(BTS const &) = delete;
   BTS &operator=(BTS const &) = delete;
 
-  static BTS &driver( void )
+  static BTS &driver(void)
   {
     static BTS SingleTone{};
 
     return SingleTone;
   }
 
-  void operator ()( std::vector<int> &vec )
+  void operator()(std::vector<int> &vec)
   {
     sort(vec);
   }
 
-  void sort( std::vector<int> &vec );
-private:
+  void sort(std::vector<int> &vec);
 
+private:
   BTS(void);
 
-  bool load_src( const std::string &cl_fname );
+  bool load_src(const std::string &cl_fname);
 };
 
 #endif // __BITON_H__
