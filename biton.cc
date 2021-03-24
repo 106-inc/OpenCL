@@ -29,17 +29,20 @@ BTS::BTS(void)
  */
 void BTS::sort(std::vector<int> &vec)
 {
-  cl::Context cont{device_};
+  //cl::Context cont{device_};
+  contx_{device_};
   cl::CommandQueue queue{cont, device_};
 
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
   cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
-  cl::Program prog{cont, sources};
+  //cl::Program prog{cont, sources};
+  prog_{contx_, sources};
 
   prog.build({device_});
 
   cl::Kernel kern{prog, "Bitonic sort"};
+
 
   // here goes a program
 } /* End of 'sort' function */
