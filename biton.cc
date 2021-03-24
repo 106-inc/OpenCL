@@ -32,7 +32,11 @@ BTS::BTS()
 
 void BTS::build()
 {
-  load_src("biton.cl");
+  if (!load_src("biton.cl"))
+  {
+    ready_ = false;
+    return;
+  }
 
   cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
   prog_ = cl::Program{context_, sources};
