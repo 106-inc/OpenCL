@@ -48,12 +48,12 @@ private:
 
 
 public:
-  BTS(BTS const &) = delete;
-  BTS &operator=(BTS const &) = delete;
+  BSort(BSort const &) = delete;
+  BSort &operator=(BSort const &) = delete;
 
-  static BTS &driver(void)
+  static BSort &driver()
   {
-    static BTS SingleTone{};
+    static BSort SingleTone{};
 
     return SingleTone;
   }
@@ -66,7 +66,7 @@ public:
   void sort(std::vector<int> &vec);
 
 private:
-  BTS(void);
+  BSort();
 
   bool load_src(const std::string &cl_fname);
 };
@@ -81,6 +81,8 @@ bool is_power_2(size_t data_size)
 {
   return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
 }
+
+extern BSort & bsort;
 
 } // namespace BTS
 #endif // __BITON_H__

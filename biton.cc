@@ -2,6 +2,10 @@
 
 namespace BTS
 {
+
+
+BSort & bsort = BSort::driver();
+
 /**
  * @brief Construct a new BSort::BSort object function
  *
