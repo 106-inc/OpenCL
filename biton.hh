@@ -22,6 +22,9 @@
  * @brief OpenCL driver class
  *
  */
+
+
+
 class BTS final
 {
 private:
@@ -35,6 +38,13 @@ private:
   bool ready_{false};
 
   void build();
+
+  enum class Directions
+  {
+      INCREASING,
+      DECREASE,
+  };
+
 
 public:
   BTS(BTS const &) = delete;
@@ -59,5 +69,19 @@ private:
 
   bool load_src(const std::string &cl_fname);
 };
+
+/**
+ * @brief
+ *
+ * @param data_size
+ * @return
+ */
+bool is_power_2(size_t data_size)
+{
+    if ((data_size & (data_size - 1)) == 0 && data_size > 1)
+        return true;
+    else
+        return false;
+}
 
 #endif // __BITON_H__
