@@ -17,9 +17,13 @@ BTS::BTS(void)
       if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
       {
         device_ = dev;
-        return;
+        break;
       }
   }
+
+  /*ВОЗОЖНО ПОНАДОБИТСЯ БРОСАТЬ ИСКЛЮЧЕНИЯ И ВСЕ ЭТО ДЕЛО РАЗДЕЛЯТЬ*/
+
+  context_ = cl::Context{device_};
 } /* End of 'BTS' function */
 
 /**
@@ -30,14 +34,13 @@ BTS::BTS(void)
 void BTS::sort(std::vector<int> &vec)
 {
   //cl::Context cont{device_};
-  contx_{device_};
-  cl::CommandQueue queue{cont, device_};
+  cl::CommandQueue queue{context_, device_};
 
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
   cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
   //cl::Program prog{cont, sources};
-  prog_{contx_, sources};
+  prog_{context_, sources};
 
   prog.build({device_});
 

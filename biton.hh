@@ -25,11 +25,11 @@
 class BTS final
 {
 private:
-  cl::Device device_{};
-  cl::Context contx_{};
-  cl::Program prog_{};
+  cl::Device device_;
+  cl::Context context_;
+  cl::Program prog_;
 
-  std::string src_code_{};
+  std::string src_code_;
 
 
 public:
