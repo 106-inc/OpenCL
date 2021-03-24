@@ -32,7 +32,20 @@ BTS::BTS()
 
 void BTS::build()
 {
+  load_src("biton.cl");
 
+  cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
+  prog_ = cl::Program{context_, sources};
+
+  try 
+  {
+    prog_.build();
+  }
+  catch (cl::Error build_err)
+  {
+    std::cerr << build_err.what() << std::endl;
+    ready_ = false;
+  }
 }
 
 /**
@@ -44,19 +57,13 @@ void BTS::sort(std::vector<int> &vec)
 {
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
-  cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
-  //cl::Program prog{cont, sources};
-  prog_ = cl::Program{context_, sources};
-
-  prog_.build({device_});
-
   cl::Kernel kern{prog_, "Bitonic sort"};
   size_t data_size = vec.size();
 
   bool res = is_power_2(data_size);
 
   if (res)
-      sort_extended(vec, Directions::INCREASING);
+    sort_extended(vec, Directions::INCREASING);
 
 
   // here goes a program
