@@ -34,7 +34,7 @@ void BTS::sort(std::vector<int> &vec)
 
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
-  cl::Program::Sources sources{1, std::make_pair(src_code.c_str(), src_code.size())};
+  cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
   cl::Program prog{cont, sources};
 
   prog.build({device_});
@@ -58,7 +58,7 @@ bool BTS::load_src(const std::string &cl_fname)
   if (!src.is_open())
     return false;
 
-  src_code = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+  src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
 
   return true;
 } /* Edn of 'load_src' function */

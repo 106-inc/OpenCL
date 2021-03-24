@@ -27,7 +27,7 @@ class BTS final
 private:
   cl::Device device_{};
 
-  std::string src_code{};
+  std::string src_code_{};
 
 public:
   BTS(BTS const &) = delete;
