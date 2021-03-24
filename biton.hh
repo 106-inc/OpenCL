@@ -23,9 +23,10 @@
  *
  */
 
+namespace BTS
+{
 
-
-class BTS final
+class BSort final
 {
 private:
   cl::Device device_;
@@ -81,4 +82,5 @@ bool is_power_2(size_t data_size)
   return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
 }
 
+} // namespace BTS
 #endif // __BITON_H__

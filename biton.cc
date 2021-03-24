@@ -1,10 +1,12 @@
 #include <biton.hh>
 
+namespace BTS
+{
 /**
- * @brief Construct a new BTS::BTS object function
+ * @brief Construct a new BSort::BSort object function
  *
  */
-BTS::BTS()
+BSort::BSort()
 {
   std::vector<cl::Platform> pls;
   cl::Platform::get(&pls);
@@ -28,9 +30,9 @@ BTS::BTS()
   context_ = cl::Context{device_};
   build();
   queue_ = cl::CommandQueue{context_, device_};
-} /* End of 'BTS' function */
+} /* End of 'BSort' function */
 
-void BTS::build()
+void BSort::build()
 {
   if (!load_src("biton.cl"))
   {
@@ -57,7 +59,7 @@ void BTS::build()
  *
  * @param[in, out] vec vector to sort
  */
-void BTS::sort(std::vector<int> &vec)
+void BSort::sort(std::vector<int> &vec)
 {
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
@@ -80,7 +82,7 @@ void BTS::sort(std::vector<int> &vec)
  * @return true if all is ok
  * @return false otherwise
  */
-bool BTS::load_src(const std::string &cl_fname)
+bool BSort::load_src(const std::string &cl_fname)
 {
   std::ifstream src(cl_fname);
 
@@ -90,4 +92,6 @@ bool BTS::load_src(const std::string &cl_fname)
   src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
 
   return true;
-} /* Edn of 'load_src' function */
+} /* End of 'load_src' function */
+
+}
