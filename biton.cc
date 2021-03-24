@@ -26,6 +26,8 @@ BTS::BTS(void)
   context_ = cl::Context{device_};
 } /* End of 'BTS' function */
 
+
+
 /**
  * @brief bitonic sort array fucntion
  *
@@ -44,7 +46,17 @@ void BTS::sort(std::vector<int> &vec)
 
   prog.build({device_});
 
-  cl::Kernel kern{prog, "Bitonic sort"};
+  size_t data_size = vec.size();
+
+  bool res = is_power_2(data_size);
+
+  if (res)
+      sort_extended(vec, Directions::INCREASING);
+
+
+
+
+  //cl::Kernel kern{prog, "Bitonic sort"};
 
 
   // here goes a program
