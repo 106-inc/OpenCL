@@ -4,7 +4,7 @@
  * @brief Construct a new BTS::BTS object function
  *
  */
-BTS::BTS(void)
+BTS::BTS()
 {
   std::vector<cl::Platform> pls;
   cl::Platform::get(&pls);
@@ -17,14 +17,23 @@ BTS::BTS(void)
       if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
       {
         device_ = dev;
+        ready_ = true;
         break;
       }
   }
 
-  /*ВОЗОЖНО ПОНАДОБИТСЯ БРОСАТЬ ИСКЛЮЧЕНИЯ И ВСЕ ЭТО ДЕЛО РАЗДЕЛЯТЬ*/
+  if (!ready_)
+    return;
 
   context_ = cl::Context{device_};
+  build();
+  queue_ = cl::CommandQueue{context_, device_};
 } /* End of 'BTS' function */
+
+void BTS::build()
+{
+
+}
 
 /**
  * @brief bitonic sort array fucntion
@@ -33,18 +42,15 @@ BTS::BTS(void)
  */
 void BTS::sort(std::vector<int> &vec)
 {
-  //cl::Context cont{device_};
-  cl::CommandQueue queue{context_, device_};
-
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
   cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
   //cl::Program prog{cont, sources};
-  prog_{context_, sources};
+  prog_ = cl::Program{context_, sources};
 
-  prog.build({device_});
+  prog_.build({device_});
 
-  cl::Kernel kern{prog, "Bitonic sort"};
+  cl::Kernel kern{prog_, "Bitonic sort"};
 
 
   // here goes a program

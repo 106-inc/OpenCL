@@ -27,10 +27,14 @@ class BTS final
 private:
   cl::Device device_;
   cl::Context context_;
+  cl::CommandQueue queue_;
   cl::Program prog_;
 
   std::string src_code_;
 
+  bool ready_{false};
+
+  void build();
 
 public:
   BTS(BTS const &) = delete;
