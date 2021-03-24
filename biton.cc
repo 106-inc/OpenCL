@@ -78,14 +78,7 @@ void BTS::sort(std::vector<int> &vec)
 
 void BTS::sort_extended(std::vector<int> &vec)
 {
-    size_t data_size = vec.size(), num_of_pairs = 0, start_size = 1;
-
-
-    while (start_size != data_size)
-    {
-        start_size *= 2;
-        ++num_of_pairs;
-    }
+    size_t data_size = vec.size(), num_of_pairs = data_size / 2;
 
     cl::Buffer buf(context_, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
                              data_size * sizeof(int), vec.data());
