@@ -48,10 +48,10 @@ private:
 
   void build();
 
-  enum class Directions
+  enum class Dir
   {
-      INCREASING,
-      DECREASE,
+    INCREASING,
+    DECREASE,
   };
 
 
