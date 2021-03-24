@@ -78,12 +78,23 @@ void BSort::sort(std::vector<int> &vec)
 
 void BSort::sort_extended(std::vector<int> &vec)
 {
-    size_t data_size = vec.size(), num_of_pairs = data_size / 2;
+    size_t data_size = vec.size(), num_of_pairs = log2(data_size);
+
+    cl::NDRange glob_size{num_of_pairs};
+    cl::NDRange loc_size{};
+
+    cl::Kernel kernel(prog_, "biton_sort");
 
     cl::Buffer buf(context_, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
                              data_size * sizeof(int), vec.data());
 
 
+    /*
+    for (size_t cur_pair_left = 0; cur_pair < num_of_pairs; ++cur_pair)
+    {
+        for (size_t cur_pair_rht; cur_pair_2 < cur_pair + num_of_pair; ++
+    }*/
+}
 }
 
 

@@ -4,6 +4,7 @@
 /* Standard io libraries */
 #include <fstream>
 #include <iostream>
+#include <cmath>
 /*****************************************/
 
 /* std containers */
