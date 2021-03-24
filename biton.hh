@@ -17,7 +17,15 @@
 #include <CL/cl.hpp>
 /****************************************/
 
+/* Our libs */
+#include "timer.hh"
+
+/****************************************/
+
+
 // TODO: здесь явно не всё -- разобраться
+
+
 /**
  * @brief OpenCL driver class
  *
@@ -68,6 +76,8 @@ private:
   BTS(void);
 
   bool load_src(const std::string &cl_fname);
+
+  void sort_extended(std::vector<int> &vec);
 };
 
 /**
