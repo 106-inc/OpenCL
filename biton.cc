@@ -7,10 +7,10 @@ namespace BTS
 BSort & bsort = BSort::driver();
 
 /**
- * @brief Construct a new BTS::BTS object function
+ * @brief Construct a new BSort::BSort object function
  *
  */
-BTS::BTS()
+BSort::BSort()
 {
   std::vector<cl::Platform> pls;
   cl::Platform::get(&pls);
@@ -34,9 +34,9 @@ BTS::BTS()
   context_ = cl::Context{device_};
   build();
   queue_ = cl::CommandQueue{context_, device_};
-} /* End of 'BTS' function */
+} /* End of 'BSort' function */
 
-void BTS::build()
+void BSort::build()
 {
   load_src("biton.cl");
 
@@ -59,7 +59,7 @@ void BTS::build()
  *
  * @param[in, out] vec vector to sort
  */
-void BTS::sort(std::vector<int> &vec)
+void BSort::sort(std::vector<int> &vec)
 {
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
@@ -69,14 +69,14 @@ void BTS::sort(std::vector<int> &vec)
   bool res = is_power_2(data_size);
 
   if (res)
-    sort_extended(vec, Directions::INCREASING);
+    sort_extended(vec, Dir::INCREASING);
 
 
   // here goes a program
 } /* End of 'sort' function */
 
 
-void BTS::sort_extended(std::vector<int> &vec)
+void BSort::sort_extended(std::vector<int> &vec)
 {
     size_t data_size = vec.size(), num_of_pairs = data_size / 2;
 
@@ -94,7 +94,7 @@ void BTS::sort_extended(std::vector<int> &vec)
  * @return true if all is ok
  * @return false otherwise
  */
-bool BTS::load_src(const std::string &cl_fname)
+bool BSort::load_src(const std::string &cl_fname)
 {
   std::ifstream src(cl_fname);
 
