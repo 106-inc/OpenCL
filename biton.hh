@@ -78,10 +78,7 @@ private:
  */
 bool is_power_2(size_t data_size)
 {
-    if ((data_size & (data_size - 1)) == 0 && data_size > 1)
-        return true;
-    else
-        return false;
+  return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
 }
 
 #endif // __BITON_H__
