@@ -89,6 +89,7 @@ void BSort::sort_extended(std::vector<int> &vec)
                              data_size * sizeof(int), vec.data());
 
 
+
     /*
     for (size_t cur_pair_left = 0; cur_pair < num_of_pairs; ++cur_pair)
     {
@@ -97,6 +98,24 @@ void BSort::sort_extended(std::vector<int> &vec)
 }
 }
 
+
+
+/**
+ * @brief enqueues a command to execute a kernel on a device.
+ * @param kernel
+ * @param offset
+ * @param glob_size
+ * @param loc_size
+ */
+bool BSort::kernel_exec(const cl::Kernel& kernel, const cl::NDRange& offset,
+                                           const cl::NDRange& glob_size,
+                                           const cl::NDRange& loc_size);
+{
+    cl:Event event;
+    if (queue_.enqueuNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl:CL_SUCCESS)
+        //! maybe exception
+        return false;
+}
 
 /**
  * @brief Load .cl source code from file

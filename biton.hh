@@ -80,6 +80,10 @@ private:
   bool load_src(const std::string &cl_fname);
 
   void sort_extended(std::vector<int> &vec);
+
+  void kernel_exec(const cl::Kernel& kernel, const cl::NDRange& offset,
+                                            const cl::NDRange& global,
+                                            const cl::NDRange& local);
 };
 
 /**
