@@ -48,6 +48,7 @@ BSort::BSort()
 
   context_ = cl::Context{device_};
   build();
+
   queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
 } /* End of 'BSort' function */
 
@@ -57,16 +58,15 @@ void BSort::build()
 
   cl::Program::Sources sources{src_code_.c_str()};
   prog_ = cl::Program{context_, sources};
-
-  std::cout << device_.getInfo<CL_DEVICE_NAME>();
   
   try
   {
-    prog_.build({device_});
+    prog_.build();
   }
   catch (const cl::Error &build_err)
   {
     std::cerr << "Error in " << build_err.what() << std::endl;
+    std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_);
     ready_ = false;
   }
 }
