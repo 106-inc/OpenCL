@@ -9,6 +9,17 @@ void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 }
 
 /**
+ * @brief Check if value is a power of 2
+ *
+ * @param[in] data_size value to check
+ * @return true if value is a power of 2, false otherwise
+ */
+bool is_power_2(size_t data_size)
+{
+  return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
+}
+
+/**
  * @brief Construct a new BSort::BSort object function
  *
  */
@@ -134,6 +145,7 @@ bool BSort::kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, con
   if (err_num != CL_SUCCESS)
     return false;
 
+  return true;
 }
 
 /** 

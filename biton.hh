@@ -78,16 +78,7 @@ private:
                    const cl::NDRange &local);
 };
 
-/**
- * @brief
- *
- * @param data_size
- * @return
- */
-bool is_power_2(size_t data_size)
-{
-  return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
-}
+bool is_power_2(size_t data_size);
 
 void bsort(std::vector<int> &vec, Dir dir = Dir::INCR);
 
