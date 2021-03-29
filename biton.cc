@@ -31,7 +31,7 @@ BSort::BSort()
   for (auto &&pl_devs : pls)
   {
     std::vector<cl::Device> devs;
-    pl_devs.getDevices(CL_DEVICE_TYPE_ALL, &devs);
+    pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
     for (auto &&dev : devs)
       if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
       {
@@ -39,6 +39,8 @@ BSort::BSort()
         ready_ = true;
         break;
       }
+    if (ready_)
+      break;
   }
 
   if (!ready_)
@@ -46,7 +48,7 @@ BSort::BSort()
 
   context_ = cl::Context{device_};
   build();
-  queue_ = cl::CommandQueue{context_, device_};
+  queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
 } /* End of 'BSort' function */
 
 void BSort::build()
@@ -56,9 +58,11 @@ void BSort::build()
   cl::Program::Sources sources{src_code_.c_str()};
   prog_ = cl::Program{context_, sources};
 
+  std::cout << device_.getInfo<CL_DEVICE_NAME>();
+  
   try
   {
-    prog_.build();
+    prog_.build({device_});
   }
   catch (const cl::Error &build_err)
   {
