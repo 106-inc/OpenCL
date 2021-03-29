@@ -30,5 +30,6 @@ target_compile_options(${EX_NAME} PRIVATE "$<$<CONFIG:DEBUG>:${PR_DEBUG_OPTIONS}
 target_compile_options(${EX_NAME} PRIVATE "$<$<CONFIG:RELEASE>:${PR_RELEASE_OPTIONS}>")
 
 target_compile_definitions(${EX_NAME} PRIVATE
-  $<$<CONFIG:Debug>:DUMPALL>
+  CL_HPP_ENABLE_EXCEPTIONS
+  CL_HPP_TARGET_OPENCL_VERSION=210
 )
