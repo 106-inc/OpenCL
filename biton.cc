@@ -74,7 +74,13 @@ void BSort::build()
  */
 void BSort::sort(std::vector<int> &vec, Dir dir)
 {
-  cl::Buffer buf{vec.begin(), vec.end(), true};
+  if (ready_)
+  {
+    std::cerr << "Errors occured." << std::endl;
+    return;
+  }
+
+  cl::Buffer buf{vec.begin(), vec.end(), false};
 
   cl::Kernel kern{prog_, "Bitonic sort"};
   size_t data_size = vec.size();
