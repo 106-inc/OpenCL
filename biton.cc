@@ -33,7 +33,7 @@ BSort::BSort()
     std::vector<cl::Device> devs;
     pl_devs.getDevices(CL_DEVICE_TYPE_ALL, &devs);
     for (auto &&dev : devs)
-      if (dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+      if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
       {
         device_ = dev;
         ready_ = true;
