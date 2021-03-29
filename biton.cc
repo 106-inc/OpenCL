@@ -70,6 +70,7 @@ void BSort::sort(std::vector<int> &vec, Dir dir)
 
   bool res = is_power_2(data_size);
 
+
   if (res)
     sort_extended(vec, Dir::INCR);
 
@@ -80,19 +81,29 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 {
   size_t data_size = vec.size(), num_of_pairs = log2(data_size);
 
-  cl::NDRange glob_size{data_size};
-
-  cl::NDRange loc_size{};
-
-  cl::Kernel kernel(prog_, "biton_sort");
+  //* this var will be usefull in local_bitonic, global_btionic
+  cl::NDRange glob_size(data_size);
+  cl::NDRange loc_size(1);
+  cl::NDRange offset(0);
 
   cl::Buffer buf(context_, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, data_size * sizeof(int), vec.data());
 
-  /*
-  for (size_t cur_pair_left = 0; cur_pair < num_of_pairs; ++cur_pair)
+  //! Loop on sorted sequence length
+  for (size_t cur_pair = 0; cur_pair < num_of_pairs; ++cur_pair)
   {
-      for (size_t cur_pair_rht; cur_pair_2 < cur_pair + num_of_pair; ++
-  }*/
+      //! Loop on comparison distance (between elems)
+      for (size_t dist_pair = cur_pair; dist_pair > 0; dist_pair >>= 1)
+      {
+          cl::Kernel kernel(prog_, "biton_sort");
+          kernel.setArg(0, vec);
+          kernel.setArg(1, cur_pair);
+          kernel.setArg(2, dist_pair);
+          kernel.setArg(3, dir);
+
+          kernel_exec(kernel, offset, glob_size, loc_size);
+      }
+  }
+
 }
 
 /**
@@ -113,7 +124,8 @@ bool BSort::kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, con
   int err_num = queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, NULL, NULL);
   
   if (err_num != CL_SUCCESS)
-    return false; 
+    return false;
+
 }
 
 /** 
