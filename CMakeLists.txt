@@ -9,6 +9,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 
-add_executable(bit.o main.cc)
+add_executable(bit.o main.cc biton.cc)
 
 target_link_libraries(bit.o OpenCL)
