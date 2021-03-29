@@ -5,13 +5,13 @@ project(bitonic)
 set(EX_NAME ${PROJECT_NAME}.o)
 
 # option for debug (debug info)
-set(PR_DEBUG_OPTIONS "-g")
+set(PR_DEBUG_OPTIONS -g)
 
 # option for release (optimization)
-set(PR_RELEASE_OPTIONS "-O2")
+set(PR_RELEASE_OPTIONS -O2)
 
 # some useful warnings
-set(WARN_OPTIONS "-Wall -Wextra -Wunused -Wpedantic -Wno-old-style-cast -Waggressive-loop-optimizations -Wnon-virtual-dtor -Wuseless-cast")
+set(WARN_OPTIONS -Wall -Wextra -Wunused -Wpedantic -Wno-old-style-cast -Waggressive-loop-optimizations -Wnon-virtual-dtor -Wuseless-cast)
 
 find_package(OpenCL REQUIRED)
 
