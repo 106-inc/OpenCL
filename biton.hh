@@ -62,6 +62,8 @@ public:
     return SingleTone;
   }
 
+  bool is_ready() const { return ready_; }
+
   void sort(std::vector<int> &vec, Dir dir);
 
 private:

@@ -25,6 +25,8 @@ int main()
   }
 
   BTS::bsort(vec);
+  if (!BTS::BSort::driver().is_ready())
+    return -1;
 
   for (auto el : vec)
     std::cout << el << std::endl;

@@ -62,7 +62,7 @@ void BSort::build()
   }
   catch (const cl::Error &build_err)
   {
-    std::cerr << build_err.what() << std::endl;
+    std::cerr << "Error in " << build_err.what() << std::endl;
     ready_ = false;
   }
 }
@@ -76,7 +76,7 @@ void BSort::sort(std::vector<int> &vec, Dir dir)
 {
   if (!ready_)
   {
-    std::cerr << "Errors occured." << std::endl;
+    std::cerr << "Errors occured" << std::endl;
     return;
   }
 
