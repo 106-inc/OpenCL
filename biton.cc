@@ -87,9 +87,7 @@ void BSort::sort(cl::vector<int> &vec, Dir dir)
 
   size_t data_size = vec.size();
 
-  bool res = is_power_2(data_size);
-
-  if (res)
+  if (is_power_2(data_size))
     sort_extended(vec, Dir::INCR);
 
   // here goes a program
