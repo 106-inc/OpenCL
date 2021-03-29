@@ -13,9 +13,10 @@
 /****************************************/
 
 /* OpenCL library */
-#define __CL_ENABLE_EXCEPTIONS
+#define CL_HPP_ENABLE_EXCEPTIONS
+#define CL_HPP_TARGET_OPENCL_VERSION 210
 
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 /****************************************/
 
 /* Our libs */
@@ -64,14 +65,14 @@ public:
     return SingleTone;
   }
 
-  void sort(std::vector<int> &vec, Dir dir = Dir::INCR);
+  void sort(std::vector<int> &vec, Dir dir);
 
 private:
   BSort();
 
   bool load_src(const std::string &cl_fname);
 
-  void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
+  void sort_extended(std::vector<int> &vec, Dir dir);
 
   bool kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &global,
                    const cl::NDRange &local);

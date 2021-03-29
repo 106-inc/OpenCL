@@ -1,5 +1,4 @@
 #include "biton.hh"
-#include <iostream>
 
 int main()
 {

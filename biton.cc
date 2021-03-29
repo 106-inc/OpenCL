@@ -1,11 +1,11 @@
-#include <biton.hh>
+#include "biton.hh"
 
 namespace BTS
 {
 
 void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
-  BSort::driver().sort(vec);
+  BSort::driver().sort(vec, dir);
 }
 
 /**
@@ -49,7 +49,7 @@ void BSort::build()
   {
     prog_.build();
   }
-  catch (cl::Error build_err)
+  catch (const cl::Error &build_err)
   {
     std::cerr << build_err.what() << std::endl;
     ready_ = false;
@@ -61,7 +61,7 @@ void BSort::build()
  *
  * @param[in, out] vec vector to sort
  */
-void BSort::sort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
+void BSort::sort(std::vector<int> &vec, Dir dir)
 {
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
@@ -76,7 +76,7 @@ void BSort::sort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
   // here goes a program
 } /* End of 'sort' function */
 
-void BSort::sort_extended(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
+void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 {
   size_t data_size = vec.size(), num_of_pairs = log2(data_size);
 
