@@ -66,6 +66,7 @@ void BSort::build()
   catch (const cl::Error &build_err)
   {
     std::cerr << "Error in " << build_err.what() << std::endl;
+    std::cerr << err_what(build_err.err()) << std::endl;
     std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_);
     ready_ = false;
   }
