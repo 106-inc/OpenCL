@@ -74,7 +74,7 @@ void BSort::build()
  */
 void BSort::sort(std::vector<int> &vec, Dir dir)
 {
-  if (ready_)
+  if (!ready_)
   {
     std::cerr << "Errors occured." << std::endl;
     return;
