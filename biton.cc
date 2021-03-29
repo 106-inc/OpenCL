@@ -80,7 +80,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 {
   size_t data_size = vec.size(), num_of_pairs = log2(data_size);
 
-  cl::NDRange glob_size{num_of_pairs};
+  cl::NDRange glob_size{data_size};
+
   cl::NDRange loc_size{};
 
   cl::Kernel kernel(prog_, "biton_sort");
@@ -104,13 +105,18 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 bool BSort::kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &glob_size,
                         const cl::NDRange &loc_size)
 {
+
+#if 0 
   cl::Event event;
-  if (queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl::CL_SUCCESS)
-    //! maybe exception
-    return false;
+#endif
+
+  int err_num = queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, NULL, NULL);
+  
+  if (err_num != CL_SUCCESS)
+    return false; 
 }
 
-/**
+/** 
  * @brief Load .cl source code from file
  *
  * @param[in] cl_fname name of a file with .cl code
