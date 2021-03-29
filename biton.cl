@@ -7,15 +7,15 @@ __kernel void bitonic_sort(__global int* data, uint cur_pair, uint dist_pair, ui
   data += i; // translate to first value
 
   /* Load */
-  data_t x0 = data[0];
-  data_t x1 = data[dist_pair];
+  int x0 = data[0];
+  int x1 = data[dist_pair];
 
   /* Sortion */
   bool swap = reverse ^ (x0 < x1);
-  uint tmp_x0 = x0;
-  uint tmp_x1 = x1;
-  x0 = (swap) ? auxb : auxa;
-  x1 = (swap) ? auxa : auxb;
+  int tmp_x0 = x0;
+  int tmp_x1 = x1;
+  x0 = (swap) ? tmp_x1 : tmp_x0;
+  x1 = (swap) ? tmp_x0 : tmp_x1;
 
   /* Store  */
   data[0] = x0;

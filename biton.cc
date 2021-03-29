@@ -69,6 +69,10 @@ void BSort::build()
     std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_);
     ready_ = false;
   }
+  catch (...)
+  {
+    std::cerr << "HI" << std::endl;
+  }
 }
 
 /**
