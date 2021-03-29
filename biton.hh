@@ -62,7 +62,10 @@ public:
     return SingleTone;
   }
 
-  bool is_ready() const { return ready_; }
+  bool is_ready() const
+  {
+    return ready_;
+  }
 
   void sort(cl::vector<int> &vec, Dir dir);
 
@@ -81,7 +84,7 @@ bool is_power_2(size_t data_size);
 
 void bsort(std::vector<int> &vec, Dir dir = Dir::INCR);
 
-const char * err_what( cl_int err_code );
+const char *err_what(cl_int err_code);
 
 } // namespace BTS
 #endif // __BITON_H__
