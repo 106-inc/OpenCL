@@ -1,23 +1,22 @@
 #include "biton.hh"
 #include <iostream>
 
-int main(void)
+int main( )
 {
-  BS::BTS::driver();
-
   std::vector<int> vec;
   size_t vec_size{};
 
-  // std::cin >> vec_size;
+  std::cin >> vec_size;
 
   vec.resize(vec_size);
 
   for (auto &el : vec)
     std::cin >> el;
 
-  BS::bitonic_sort(vec);
+  BTS::bsort(vec);
 
   for (auto el : vec)
-    std::cout << el;
+    std::cout << el << std::endl;
+
   return 0;
 }
