@@ -11,7 +11,11 @@ set(PR_DEBUG_OPTIONS -g)
 set(PR_RELEASE_OPTIONS -O2)
 
 # some useful warnings
-set(WARN_OPTIONS -Wall -Wextra -Wunused -Wpedantic -Wno-old-style-cast -Waggressive-loop-optimizations -Wnon-virtual-dtor -Wuseless-cast)
+set(WARN_OPTIONS 
+  -Wall -Wextra -Wunused -Wpedantic # classic
+  -Wno-old-style-cast -Waggressive-loop-optimizations 
+  -Wuseless-cast
+  -Wunreachable-code)
 
 find_package(OpenCL REQUIRED)
 
