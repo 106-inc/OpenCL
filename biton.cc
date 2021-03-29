@@ -42,7 +42,7 @@ void BSort::build()
 {
   load_src("biton.cl");
 
-  cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
+  cl::Program::Sources sources(1, std::make_pair(src_code_.c_str(), src_code_.size()));
   prog_ = cl::Program{context_, sources};
 
   try
@@ -79,12 +79,20 @@ void BSort::sort(std::vector<int> &vec, Dir dir)
 
 void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 {
-  size_t data_size = vec.size(), num_of_pairs = log2(data_size);
+  size_t data_size = vec.size();               /*, num_of_pairs = log2(data_size); i really dont know */
+  size_t num_of_pairs = 0, tmp_data_size = 1;  /* what is the best idea : cycle or log2               */
+
+  while (tmp_data_size < data_size)
+  {
+      tmp_data_size *= 2;
+      ++num_of_pairs;
+  }
 
   //* this var will be usefull in local_bitonic, global_btionic
   cl::NDRange glob_size(data_size);
   cl::NDRange loc_size(1);
   cl::NDRange offset(0);
+  //* but now it useless
 
   cl::Buffer buf(context_, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, data_size * sizeof(int), vec.data());
 
