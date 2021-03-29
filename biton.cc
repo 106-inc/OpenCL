@@ -42,7 +42,7 @@ void BSort::build()
 {
   load_src("biton.cl");
 
-  cl::Program::Sources sources(1, std::make_pair(src_code_.c_str(), src_code_.size()));
+  cl::Program::Sources sources{src_code_.c_str()};
   prog_ = cl::Program{context_, sources};
 
   try
