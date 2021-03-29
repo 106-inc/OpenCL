@@ -24,6 +24,7 @@ add_executable(${EX_NAME} main.cc biton.cc)
 # Specify standard
 target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
 
+# Specify warning options
 target_compile_options(${EX_NAME} PRIVATE ${WARN_OPTIONS})
 
 # Required libraries
