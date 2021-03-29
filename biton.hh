@@ -64,14 +64,14 @@ public:
 
   bool is_ready() const { return ready_; }
 
-  void sort(std::vector<int> &vec, Dir dir);
+  void sort(cl::vector<int> &vec, Dir dir);
 
 private:
   BSort();
 
   bool load_src(const std::string &cl_fname);
 
-  void sort_extended(std::vector<int> &vec, Dir dir);
+  void sort_extended(cl::vector<int> &vec, Dir dir);
 
   bool kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &global,
                    const cl::NDRange &local);

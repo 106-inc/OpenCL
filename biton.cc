@@ -3,7 +3,7 @@
 namespace BTS
 {
 
-void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
+void bsort(cl::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
   BSort::driver().sort(vec, dir);
 }
@@ -76,7 +76,7 @@ void BSort::build()
  *
  * @param[in, out] vec vector to sort
  */
-void BSort::sort(std::vector<int> &vec, Dir dir)
+void BSort::sort(cl::vector<int> &vec, Dir dir)
 {
   if (!ready_)
   {
@@ -84,13 +84,9 @@ void BSort::sort(std::vector<int> &vec, Dir dir)
     return;
   }
 
-  cl::Buffer buf{vec.begin(), vec.end(), false};
-
-  cl::Kernel kern{prog_, "Bitonic sort"};
   size_t data_size = vec.size();
 
   bool res = is_power_2(data_size);
-
 
   if (res)
     sort_extended(vec, Dir::INCR);
@@ -98,16 +94,11 @@ void BSort::sort(std::vector<int> &vec, Dir dir)
   // here goes a program
 } /* End of 'sort' function */
 
-void BSort::sort_extended(std::vector<int> &vec, Dir dir)
+void BSort::sort_extended(cl::vector<int> &vec, Dir dir)
 {
   size_t data_size = vec.size();               /*, num_of_pairs = log2(data_size); i really dont know */
-  size_t num_of_pairs = 0, tmp_data_size = 1;  /* what is the best idea : cycle or log2               */
+  size_t num_of_pairs = std::log2(data_size);
 
-  while (tmp_data_size < data_size)
-  {
-      tmp_data_size *= 2;
-      ++num_of_pairs;
-  }
 
   //* this var will be usefull in local_bitonic, global_btionic
   cl::NDRange glob_size(data_size);
@@ -115,21 +106,32 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
   cl::NDRange offset(0);
   //* but now it useless
 
-  cl::Buffer buf(context_, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, data_size * sizeof(int), vec.data());
+  cl::Buffer buf(context_, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, data_size * sizeof(int), vec.data());
 
   //! Loop on sorted sequence length
   for (size_t cur_pair = 0; cur_pair < num_of_pairs; ++cur_pair)
   {
       //! Loop on comparison distance (between elems)
       for (size_t dist_pair = cur_pair; dist_pair > 0; dist_pair >>= 1)
-      {
-          cl::Kernel kernel(prog_, "biton_sort");
-          kernel.setArg(0, vec);
-          kernel.setArg(1, cur_pair);
-          kernel.setArg(2, dist_pair);
-          kernel.setArg(3, dir);
+      {   
+          try 
+          {
+            cl::Kernel kernel(prog_, "bitonic_sort");
 
-          kernel_exec(kernel, offset, glob_size, loc_size);
+            kernel.setArg(0, buf);
+            kernel.setArg(1, static_cast<unsigned>(cur_pair));
+            kernel.setArg(2, static_cast<unsigned>(dist_pair));
+            kernel.setArg(3, static_cast<unsigned>(dir));
+
+            kernel_exec(kernel, offset, glob_size, loc_size);
+          }
+          catch (cl::Error &err)
+          {
+            std::cerr << "Error occured in " << err.what() << std::endl;
+            std::cerr << "Err num is " << err.err() << std::endl;
+
+            return;
+          }
       }
   }
 

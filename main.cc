@@ -2,7 +2,7 @@
 
 int main()
 {
-  std::vector<int> vec;
+  cl::vector<int> vec;
   size_t vec_size{};
 
   std::cin >> vec_size;
@@ -25,6 +25,7 @@ int main()
   }
 
   BTS::bsort(vec);
+
   if (!BTS::BSort::driver().is_ready())
     return -1;
 
