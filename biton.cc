@@ -4,7 +4,10 @@ namespace BTS
 {
 
 
-BSort & bsort = BSort::driver();
+void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
+{
+  BSort::driver().sort(vec);
+}
 
 /**
  * @brief Construct a new BSort::BSort object function
@@ -59,7 +62,7 @@ void BSort::build()
  *
  * @param[in, out] vec vector to sort
  */
-void BSort::sort(std::vector<int> &vec)
+void BSort::sort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
   cl::Buffer buf{vec.begin(), vec.end(), true};
 
@@ -69,14 +72,14 @@ void BSort::sort(std::vector<int> &vec)
   bool res = is_power_2(data_size);
 
   if (res)
-    sort_extended(vec, Dir::INCREASING);
+    sort_extended(vec, Dir::INCR);
 
 
   // here goes a program
 } /* End of 'sort' function */
 
 
-void BSort::sort_extended(std::vector<int> &vec)
+void BSort::sort_extended(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
     size_t data_size = vec.size(), num_of_pairs = log2(data_size);
 
@@ -96,8 +99,6 @@ void BSort::sort_extended(std::vector<int> &vec)
         for (size_t cur_pair_rht; cur_pair_2 < cur_pair + num_of_pair; ++
     }*/
 }
-}
-
 
 
 /**
@@ -108,11 +109,11 @@ void BSort::sort_extended(std::vector<int> &vec)
  * @param loc_size
  */
 bool BSort::kernel_exec(const cl::Kernel& kernel, const cl::NDRange& offset,
-                                           const cl::NDRange& glob_size,
-                                           const cl::NDRange& loc_size);
+                                                  const cl::NDRange& glob_size,
+                                                  const cl::NDRange& loc_size)
 {
-    cl:Event event;
-    if (queue_.enqueuNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl:CL_SUCCESS)
+    cl::Event event;
+    if (queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl::CL_SUCCESS)
         //! maybe exception
         return false;
 }
@@ -135,3 +136,5 @@ bool BSort::load_src(const std::string &cl_fname)
 
   return true;
 } /* Edn of 'load_src' function */
+
+}
