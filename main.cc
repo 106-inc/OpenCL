@@ -1,7 +1,7 @@
 #include "biton.hh"
 #include <iostream>
 
-int main( )
+int main()
 {
   std::vector<int> vec;
   size_t vec_size{};

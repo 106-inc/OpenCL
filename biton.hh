@@ -2,9 +2,9 @@
 #define __BITON_H__
 
 /* Standard io libraries */
+#include <cmath>
 #include <fstream>
 #include <iostream>
-#include <cmath>
 /*****************************************/
 
 /* std containers */
@@ -23,9 +23,7 @@
 
 /****************************************/
 
-
 // TODO: здесь явно не всё -- разобраться
-
 
 /**
  * @brief OpenCL driver class
@@ -44,7 +42,6 @@ enum class Dir
 class BSort final
 {
 private:
-
   cl::Device device_;
   cl::Context context_;
   cl::CommandQueue queue_;
@@ -57,7 +54,6 @@ private:
   void build();
 
 public:
-
   BSort(BSort const &) = delete;
   BSort &operator=(BSort const &) = delete;
 
@@ -71,16 +67,14 @@ public:
   void sort(std::vector<int> &vec, Dir dir = Dir::INCR);
 
 private:
-
   BSort();
 
   bool load_src(const std::string &cl_fname);
 
   void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
 
-  bool kernel_exec(const cl::Kernel& kernel, const cl::NDRange& offset,
-                                             const cl::NDRange& global,
-                                             const cl::NDRange& local);
+  bool kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &global,
+                   const cl::NDRange &local);
 };
 
 /**
@@ -94,7 +88,7 @@ bool is_power_2(size_t data_size)
   return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
 }
 
-void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */);
+void bsort(std::vector<int> &vec, Dir dir = Dir::INCR);
 
 } // namespace BTS
 #endif // __BITON_H__

@@ -3,7 +3,6 @@
 namespace BTS
 {
 
-
 void bsort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
   BSort::driver().sort(vec);
@@ -46,7 +45,7 @@ void BSort::build()
   cl::Program::Sources sources{1, std::make_pair(src_code_.c_str(), src_code_.size())};
   prog_ = cl::Program{context_, sources};
 
-  try 
+  try
   {
     prog_.build();
   }
@@ -74,32 +73,26 @@ void BSort::sort(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
   if (res)
     sort_extended(vec, Dir::INCR);
 
-
   // here goes a program
 } /* End of 'sort' function */
 
-
 void BSort::sort_extended(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
 {
-    size_t data_size = vec.size(), num_of_pairs = log2(data_size);
+  size_t data_size = vec.size(), num_of_pairs = log2(data_size);
 
-    cl::NDRange glob_size{num_of_pairs};
-    cl::NDRange loc_size{};
+  cl::NDRange glob_size{num_of_pairs};
+  cl::NDRange loc_size{};
 
-    cl::Kernel kernel(prog_, "biton_sort");
+  cl::Kernel kernel(prog_, "biton_sort");
 
-    cl::Buffer buf(context_, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
-                             data_size * sizeof(int), vec.data());
+  cl::Buffer buf(context_, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, data_size * sizeof(int), vec.data());
 
-
-
-    /*
-    for (size_t cur_pair_left = 0; cur_pair < num_of_pairs; ++cur_pair)
-    {
-        for (size_t cur_pair_rht; cur_pair_2 < cur_pair + num_of_pair; ++
-    }*/
+  /*
+  for (size_t cur_pair_left = 0; cur_pair < num_of_pairs; ++cur_pair)
+  {
+      for (size_t cur_pair_rht; cur_pair_2 < cur_pair + num_of_pair; ++
+  }*/
 }
-
 
 /**
  * @brief enqueues a command to execute a kernel on a device.
@@ -108,14 +101,13 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir /* = Dir::INCR */)
  * @param glob_size
  * @param loc_size
  */
-bool BSort::kernel_exec(const cl::Kernel& kernel, const cl::NDRange& offset,
-                                                  const cl::NDRange& glob_size,
-                                                  const cl::NDRange& loc_size)
+bool BSort::kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &glob_size,
+                        const cl::NDRange &loc_size)
 {
-    cl::Event event;
-    if (queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl::CL_SUCCESS)
-        //! maybe exception
-        return false;
+  cl::Event event;
+  if (queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, &event) != cl::CL_SUCCESS)
+    //! maybe exception
+    return false;
 }
 
 /**
@@ -137,4 +129,4 @@ bool BSort::load_src(const std::string &cl_fname)
   return true;
 } /* Edn of 'load_src' function */
 
-}
+} // namespace BTS
