@@ -1,23 +1,20 @@
 #include "biton.hh"
 
-namespace BTS
+namespace BTS 
 {
-
-void bsort(cl::vector<int> &vec, Dir dir /* = Dir::INCR */)
-{
-  BSort::driver().sort(vec, dir);
-}
 
 /**
- * @brief Check if value is a power of 2
- *
- * @param[in] data_size value to check
- * @return true if value is a power of 2, false otherwise
+ * @brief 
+ * 
+ * @param vec 
+ * @param dir 
  */
-bool is_power_2(size_t data_size)
+void bsort(std::vector<int>& vec, Dir dir)
 {
-  return ((data_size & (data_size - 1)) == 0 && data_size > 1) ? true : false;
-}
+    BSort ctor{};
+    ctor.sort_extended(vec, dir);
+} /* End of 'bsort' function */
+
 
 /**
  * @brief Construct a new BSort::BSort object function
@@ -25,155 +22,164 @@ bool is_power_2(size_t data_size)
  */
 BSort::BSort()
 {
-  std::vector<cl::Platform> pls;
-  cl::Platform::get(&pls);
+    Device_selection();
 
-  for (auto &&pl_devs : pls)
-  {
-    std::vector<cl::Device> devs;
-    pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
-    for (auto &&dev : devs)
-      if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
-      {
-        device_ = dev;
-        ready_ = true;
-        break;
-      }
-    if (ready_)
-      break;
-  }
+    work_group_size = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
-  if (!ready_)
+    context_ = cl::Context({device_});
+    queue_ = cl::CommandQueue(context_, device_);
+
+    build();
+
     return;
-
-  context_ = cl::Context{device_};
-  build();
-
-  queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
 } /* End of 'BSort' function */
 
-void BSort::build()
-{
-  load_src("biton.cl");
 
-  cl::Program::Sources sources{src_code_};
-  prog_ = cl::Program{context_, sources};
-
-  try
-  {
-    prog_.build();
-  }
-  catch (const cl::Error &build_err)
-  {
-    std::cerr << "Error in " << build_err.what() << std::endl;
-    std::cerr << err_what(build_err.err()) << std::endl;
-    std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_);
-    ready_ = false;
-  }
-}
 
 /**
- * @brief bitonic sort array fucntion
- *
- * @param[in, out] vec vector to sort
+ * @brief Function for selecting gpu-device
  */
-void BSort::sort(cl::vector<int> &vec, Dir dir)
+void BSort::Device_selection() 
 {
-  if (!ready_)
-  {
-    std::cerr << "Errors occured" << std::endl;
-    return;
-  }
+    std::vector<cl::Platform> pls;
+    cl::Platform::get(&pls);
 
-  size_t data_size = vec.size();
-
-  if (is_power_2(data_size))
-    sort_extended(vec, Dir::INCR);
-
-  // here goes a program
-} /* End of 'sort' function */
-
-void BSort::sort_extended(cl::vector<int> &vec, Dir dir)
-{
-  size_t data_size = vec.size(); /*, num_of_pairs = log2(data_size); i really dont know */
-  size_t num_of_pairs = std::log2(data_size);
-
-  //* this var will be usefull in local_bitonic, global_btionic
-  cl::NDRange glob_size(data_size);
-  cl::NDRange loc_size(1);
-  cl::NDRange offset(0);
-  //* but now it useless
-
-  cl::Buffer buf(context_, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, data_size * sizeof(int), vec.data());
-
-  //! Loop on sorted sequence length
-  for (size_t cur_pair = 0; cur_pair < num_of_pairs; ++cur_pair)
-  {
-    //! Loop on comparison distance (between elems)
-    for (size_t dist_pair = cur_pair; dist_pair > 0; dist_pair >>= 1)
+    for (auto &&pl_devs : pls)
     {
-      try
-      {
-        cl::Kernel kernel(prog_, "bitonic_sort");
+        std::vector<cl::Device> devs;
+        pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
 
-        kernel.setArg(0, buf);
-        kernel.setArg(1, static_cast<unsigned>(cur_pair));
-        kernel.setArg(2, static_cast<unsigned>(dist_pair));
-        kernel.setArg(3, static_cast<unsigned>(dir));
-
-        kernel_exec(kernel, offset, glob_size, loc_size);
-      }
-      catch (cl::Error &err)
-      {
-        std::cerr << "Error occured in " << err.what() << std::endl;
-        std::cerr << err_what(err.err()) << std::endl;
-
-        return;
-      }
+        for (auto &&dev : devs)
+        if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+        {
+            device_ = dev;
+            return;
+        }
     }
-  }
-}
+
+    throw std::invalid_argument("No devices found");
+}  /* End of 'Device_selection' function */
+
 
 /**
- * @brief enqueues a command to execute a kernel on a device.
- * @param kernel
- * @param offset
- * @param glob_size
- * @param loc_size
+ * @brief 
+ * 
+ * @return true 
+ * @return false 
  */
-bool BSort::kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &glob_size,
-                        const cl::NDRange &loc_size)
-{
+bool BSort::build()
+{   
+    std::ifstream src(kernel_file_);
 
-#if 0 
-  cl::Event event;
-#endif
-
-  int err_num = queue_.enqueueNDRangeKernel(kernel, offset, glob_size, loc_size, NULL, NULL);
-
-  if (err_num != CL_SUCCESS)
+    if (!src.is_open())
     return false;
 
-  return true;
-}
+    src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+
+    sources_ = cl::Program::Sources(1, std::make_pair(src_code_.c_str(), src_code_.length() + 1));
+
+    prog_ = cl::Program(context_, sources_);
+    prog_.build();
+
+    simple_sort_ = cl::Kernel(prog_, "simple_sort");
+
+    return true;
+} /* End of 'build' function */
+
 
 /**
- * @brief Load .cl source code from file
- *
- * @param[in] cl_fname name of a file with .cl code
- * @return true if all is ok
- * @return false otherwise
+ * @brief 
+ * 
+ * @param vec 
+ * @param dir 
  */
-bool BSort::load_src(const std::string &cl_fname)
+void BSort::sort_extended(std::vector<int> &vec, Dir dir) 
 {
-  std::ifstream src(cl_fname);
+    size_t old_vec_size = vec.size();
+    Vec_preparing(vec, dir);
+    size_t new_vec_size = vec.size();
 
-  if (!src.is_open())
-    return false;
+    size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+    size_t glob_size = vec.size() / 2;
+    size_t loc_size = std::min(glob_size, work_grp_sze);
 
-  src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+    cl::Buffer buffer(context_, CL_MEM_READ_WRITE, sizeof(int) * vec.size());
+    queue_.enqueueWriteBuffer(buffer, CL_TRUE, 0, sizeof(int) * vec.size(), vec.data());
 
-  return true;
-} /* Edn of 'load_src' function */
+    int num_of_pairs = std::ceil(std::log2(new_vec_size));
+    int cur_pair = std::log2(loc_size);
 
-} // namespace BTS
+    /*cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));*/
+
+    simple_sort_.setArg(0, buffer);
+    simple_sort_.setArg(3, dir);
+
+    for (; cur_pair < num_of_pairs; ++cur_pair) 
+    {
+        simple_sort_.setArg(1, cur_pair);
+
+        for (int passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
+        {
+            simple_sort_.setArg(2, passed_pair);
+            kernel_exec(simple_sort_, glob_size, loc_size);
+        }
+    }
+
+    auto mapped_vec = (int *)queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int));
+
+        for (size_t i = 0; i < new_vec_size; i++)
+            vec[i] = mapped_vec[i];
+        
+    queue_.enqueueUnmapMemObject(buffer, mapped_vec);
+
+    vec.resize(old_vec_size);
+} /* End of 'sort_extended' function */
+
+/**
+ * @brief 
+ * 
+ * @param vec 
+ * @param dir 
+ */
+void BSort::Vec_preparing(std::vector<int>& vec, Dir dir)
+{
+    size_t old_vec_size = vec.size();
+    size_t new_vec_size = std::pow(2,1 + static_cast<int>(log2(old_vec_size)));
+
+    int pushing_num = 0;
+    
+    if (dir == Dir::INCR)
+        pushing_num = std::numeric_limits<int>::max();
+
+    else
+        pushing_num = std::numeric_limits<int>::min();
+
+    vec.reserve(new_vec_size);
+    for (size_t i = old_vec_size; i < new_vec_size; ++i)
+        vec.push_back(pushing_num);
+} /* End of 'Vec_preparing' function*/
+
+
+/**
+ * @brief 
+ * 
+ * @param kernel 
+ * @param global_size 
+ * @param local_size 
+ * @return true 
+ * @return false 
+ */
+bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size)
+{
+    cl::Event event;
+    int err_num = queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size, nullptr, &event);
+
+    if (err_num != CL_SUCCESS)
+        return false;
+
+    event.wait();
+    return true;
+}
+
+} /* End of 'kernel_exec' function*/
+

@@ -1,36 +1,35 @@
 #include "biton.hh"
 
-int main()
+int main() 
 {
-  cl::vector<int> vec;
-  size_t vec_size{};
+    std::vector<int> vec;
+    size_t vec_size{};
 
-  std::cin >> vec_size;
-  if (!std::cin.good())
-  {
-    std::cout << "Invalid character at stdin" << std::endl;
-    return -1;
-  }
+    std::cin >> vec_size;
 
-  vec.resize(vec_size);
-
-  for (auto &el : vec)
-  {
-    std::cin >> el;
     if (!std::cin.good())
     {
-      std::cout << "Invalid character at stdin" << std::endl;
-      return -1;
+        std::cout << "Invalid character at stdin" << std::endl;
+        return -1;
     }
-  }
 
-  BTS::bsort(vec);
+    vec.resize(vec_size);
 
-  if (!BTS::BSort::driver().is_ready())
-    return -1;
+    for (auto &el : vec)
+    {
+        std::cin >> el;
+        if (!std::cin.good())
+        {
+            std::cout << "Invalid character at stdin" << std::endl;
+            return -1;
+        }
+    }
 
-  for (auto el : vec)
-    std::cout << el << std::endl;
+    BTS::bsort(vec, BTS::Dir::INCR);
 
-  return 0;
+
+    for (size_t i = 0; i < vec_size; ++i)
+        std::cout << vec[i] << " ";
+
+    std::cout << std::endl;
 }

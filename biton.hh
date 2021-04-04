@@ -5,6 +5,8 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+
 /*****************************************/
 
 /* std containers */
@@ -13,10 +15,14 @@
 /****************************************/
 
 /* OpenCL library */
-#include <CL/cl2.hpp>
+
+#include <CL/cl.hpp>
+
+
 /****************************************/
 
 /* Our libs */
+
 #include "timer.hh"
 
 /****************************************/
@@ -27,64 +33,54 @@
  * @brief OpenCL driver class
  *
  */
-
-namespace BTS
+namespace BTS 
 {
+    enum class Dir
+    {
+        DECR,
+        INCR
+    };
 
-enum class Dir
-{
-  INCR,
-  DECR
-};
 
-class BSort final
-{
-private:
-  cl::Device device_;
-  cl::Context context_;
-  cl::CommandQueue queue_;
-  cl::Program prog_;
+    class BSort final 
+    {
+    private:
+        cl::Context context_;
+        cl::Device device_;
 
-  std::string src_code_;
+        cl::Program::Sources sources_;
+        cl::CommandQueue queue_;
+        cl::Program prog_;
 
-  bool ready_{false};
+        cl::Kernel simple_sort_;
 
-  void build();
+        std::string kernel_file_ = "../biton.cl";
 
-public:
-  BSort(BSort const &) = delete;
-  BSort &operator=(BSort const &) = delete;
+        std::string src_code_;
 
-  static BSort &driver()
-  {
-    static BSort SingleTone{};
+        size_t work_group_size = 0;
 
-    return SingleTone;
-  }
+    private:
+        bool build();
 
-  bool is_ready() const
-  {
-    return ready_;
-  }
+        void Vec_preparing(std::vector<int>& vec, Dir dir);
 
-  void sort(cl::vector<int> &vec, Dir dir);
+        bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size);
 
-private:
-  BSort();
+    public:
 
-  bool load_src(const std::string &cl_fname);
+        BSort();
+        BSort(BSort const &) = delete;
+        BSort &operator=(BSort const &) = delete;
 
-  void sort_extended(cl::vector<int> &vec, Dir dir);
+        void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
 
-  bool kernel_exec(const cl::Kernel &kernel, const cl::NDRange &offset, const cl::NDRange &global,
-                   const cl::NDRange &local);
-};
+        void Device_selection(); //choose first suited platform and device
+    };
 
-bool is_power_2(size_t data_size);
 
-void bsort(std::vector<int> &vec, Dir dir = Dir::INCR);
+    void bsort(std::vector<int>& vec, Dir dir);
+    const char *err_what(cl_int err_code);
+}
 
-const char *err_what(cl_int err_code);
-
-} // namespace BTS
-#endif // __BITON_H__
+#endif
