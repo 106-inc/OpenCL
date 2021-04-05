@@ -12,9 +12,6 @@ namespace BTS
 void bsort(std::vector<int>& vec, Dir dir)
 {
     BSort::driver().sort_extended(vec, dir);
-    /*
-    BSort ctor{};
-    ctor.sort_extended(vec, dir);*/
 } /* End of 'bsort' function */
 
 
@@ -110,10 +107,10 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
     size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
-    //! global_size <=> number of work-items that I with to execute
+    //! global_size <=> number of work-items that I wish to execute
     size_t glob_size = vec.size() / 2;
 
-    //! local_size <=> number of work-items that I with to group into a work-group
+    //! local_size <=> number of work-items that I wish to group into a work-group
     //! size of loc_size should be less or equal work_group
     //! This is the reason of comparing elems on this distance
     size_t loc_size = std::min(glob_size, work_grp_sze);

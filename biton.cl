@@ -31,7 +31,7 @@ __kernel void simple_sort(__global int * vec, uint cur_pair, uint passed_pair, u
 __kernel void fast_sort(__global int* vec, uint cur_pair, __local int* local_data, uint direction) 
 {
     
-    //initializing data for allocation memory
+    //! Initializing data for allocation memory
     uint local_id  = get_local_id(0);
     uint dir = direction;
     uint group_size = get_local_size(0);
