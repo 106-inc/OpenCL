@@ -29,9 +29,8 @@ BSort::BSort()
     context_ = cl::Context({device_});
     queue_ = cl::CommandQueue(context_, device_);
 
-    build();
-
-    return;
+    if (!build())
+        throw std::runtime_error{"Building of program wasn't sucsessful!\n"};
 } /* End of 'BSort' function */
 
 
@@ -57,7 +56,7 @@ void BSort::Device_selection()
         }
     }
 
-    throw std::invalid_argument("Devices didn't find!\n");
+    throw std::runtime_error("Devices didn't find!\n");
 }  /* End of 'Device_selection' function */
 
 
@@ -138,7 +137,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
         //! fast_sort_ execution
-        kernel_exec(fast_sort_, glob_size, loc_size);
+        if (!kernel_exec(fast_sort_, glob_size, loc_size))
+            throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
     }
     catch (cl::Error& err)
     {
@@ -165,7 +165,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
                 
 
                 //! Same
-                kernel_exec(simple_sort_, glob_size, loc_size);
+                if (!kernel_exec(simple_sort_, glob_size, loc_size))
+                    throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
             }
 
             catch (cl::Error& err)
@@ -188,6 +189,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     vec.resize(old_vec_size);
 } /* End of 'sort_extended' function */
 
+
+
 /**
  * @brief Hepler function for 'sort extended'
  *        This function extend our vector to near number, which are power of a two
@@ -200,18 +203,20 @@ void BSort::Vec_preparing(std::vector<int>& vec, Dir dir)
     size_t old_vec_size = vec.size();
     size_t new_vec_size = std::pow(2,1 + static_cast<int>(log2(old_vec_size)));
 
-    int pushing_num = 0;
+    int num_for_fill = 0;
     
     if (dir == Dir::INCR)
-        pushing_num = std::numeric_limits<int>::max();
+        num_for_fill = std::numeric_limits<int>::max();
 
     else
-        pushing_num = std::numeric_limits<int>::min();
+        num_for_fill = std::numeric_limits<int>::min();
 
     vec.reserve(new_vec_size);
+
     for (size_t i = old_vec_size; i < new_vec_size; ++i)
-        vec.push_back(pushing_num);
+        vec.push_back(num_for_fill);
 } /* End of 'Vec_preparing' function*/
+
 
 
 /**
@@ -233,7 +238,8 @@ bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size
 
     event.wait();
     return true;
-}
-
 } /* End of 'kernel_exec' function*/
+
+
+} 
 
