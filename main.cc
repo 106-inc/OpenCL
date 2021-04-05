@@ -29,7 +29,7 @@ int main()
 
     Time::Timer timer; 
     std::sort(comp_vec.begin(), comp_vec.end());
-    std::cout << "std::sort(...) time: " << timer.elapsed() << " microsecons\n";
+    std::cout << "std::sort(...) time: " << timer.elapsed() << " microseconds\n";
 
     BTS::bsort(vec, BTS::Dir::INCR);
     
@@ -43,12 +43,12 @@ int main()
 
     if (vec == comp_vec)
     {
-        std::cout << "Sorting was succesfully!\n";
+        std::cout << "Sortion was succesfully!\n";
         return 0;
     }
     else 
     {
-        std::cout << "Sorting wasn't succesfully!\n";
+        std::cout << "Sortion wasn't succesfully!\n";
         return -1;
     }
 
