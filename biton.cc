@@ -82,6 +82,7 @@ bool BSort::build()
     prog_.build();
 
     simple_sort_ = cl::Kernel(prog_, "simple_sort");
+    fast_sort_ = cl::Kernel(prog_, "fast_sort");
 
     return true;
 } /* End of 'build' function */
@@ -94,44 +95,73 @@ bool BSort::build()
  * @param dir 
  */
 void BSort::sort_extended(std::vector<int> &vec, Dir dir) 
-{
+{   
+    Time::Timer timer;
+    
+    //! Getting old size for resizing in future out vec
     size_t old_vec_size = vec.size();
+
+    //! Resizing our vec for working with a number that is a power of two
     Vec_preparing(vec, dir);
     size_t new_vec_size = vec.size();
 
+    //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
     size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+
+    //! global_size <=> number of work-items that I with to execute
     size_t glob_size = vec.size() / 2;
+
+    //! local_size <=> number of work-items that I with to group into a work-group
+    //! size of loc_size should be less or equal work_group
+    //! This is the reason of comparing elems on this distance
     size_t loc_size = std::min(glob_size, work_grp_sze);
 
+    //! Creating special buffer for working with glod memory in kernel
     cl::Buffer buffer(context_, CL_MEM_READ_WRITE, sizeof(int) * vec.size());
     queue_.enqueueWriteBuffer(buffer, CL_TRUE, 0, sizeof(int) * vec.size(), vec.data());
 
+    //! Getting number of pairs of our resized vector
     int num_of_pairs = std::ceil(std::log2(new_vec_size));
+
     int cur_pair = std::log2(loc_size);
 
-    /*cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));*/
+    //! Allocation local memory for working in fast_sort_
+    cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
 
-    simple_sort_.setArg(0, buffer);
-    simple_sort_.setArg(3, dir);
+
+    //! Setting args for execution fast_sort_
+    fast_sort_.setArg(0, buffer);
+    fast_sort_.setArg(1, cur_pair);
+    fast_sort_.setArg(2, local);
+    fast_sort_.setArg(3, static_cast<unsigned>(dir));
+
+    //! fast_sort_ execution
+    kernel_exec(fast_sort_, glob_size, loc_size);
 
     for (; cur_pair < num_of_pairs; ++cur_pair) 
     {
-        simple_sort_.setArg(1, cur_pair);
-
         for (int passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
         {
-            simple_sort_.setArg(2, passed_pair);
+            //! Setting args for execution simple_sort_
+            simple_sort_.setArg(0, buffer);
+            simple_sort_.setArg(1, static_cast<unsigned>(cur_pair));
+            simple_sort_.setArg(2, static_cast<unsigned>(passed_pair));
+            simple_sort_.setArg(3, static_cast<unsigned>(dir));
+
+            //! Same
             kernel_exec(simple_sort_, glob_size, loc_size);
         }
     }
 
-    auto mapped_vec = (int *)queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int));
+    //Getting sorted buf with help mapping cl::Buffer
+    auto mapped_vec = static_cast<int*>(queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int)));
 
-        for (size_t i = 0; i < new_vec_size; i++)
-            vec[i] = mapped_vec[i];
-        
+    for (size_t i = 0; i < new_vec_size; i++)
+        vec[i] = mapped_vec[i];
+    
     queue_.enqueueUnmapMemObject(buffer, mapped_vec);
 
+    std::cout << timer.elapsed() << " microseconds\n";
     vec.resize(old_vec_size);
 } /* End of 'sort_extended' function */
 
