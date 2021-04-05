@@ -53,6 +53,7 @@ namespace BTS
         cl::Program prog_;
 
         cl::Kernel simple_sort_;
+        cl::Kernel fast_sort_;
 
         std::string kernel_file_ = "../biton.cl";
 
