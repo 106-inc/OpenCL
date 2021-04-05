@@ -2,8 +2,12 @@
 #define __BITON_H__
 
 /* Standard io libraries */
+#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <exception>
+
 /*****************************************/
 
 /* std containers */
@@ -13,44 +17,79 @@
 
 /* OpenCL library */
 #define __CL_ENABLE_EXCEPTIONS
-
 #include <CL/cl.hpp>
+
+
+/****************************************/
+
+/* Our libs */
+
+#include "timer.hh"
+
 /****************************************/
 
 // TODO: здесь явно не всё -- разобраться
+
 /**
  * @brief OpenCL driver class
  *
  */
-class BTS final
+namespace BTS 
 {
-private:
-  cl::Device device_{};
+    enum class Dir
+    {
+        DECR,
+        INCR
+    };
 
-  std::string src_code_{};
 
-public:
-  BTS(BTS const &) = delete;
-  BTS &operator=(BTS const &) = delete;
+    class BSort final 
+    {
+    private:
+        cl::Context context_;
+        cl::Device device_;
 
-  static BTS &driver(void)
-  {
-    static BTS SingleTone{};
+        cl::Program::Sources sources_;
+        cl::CommandQueue queue_;
+        cl::Program prog_;
 
-    return SingleTone;
-  }
+        cl::Kernel simple_sort_;
+        cl::Kernel fast_sort_;
 
-  void operator()(std::vector<int> &vec)
-  {
-    sort(vec);
-  }
+        std::string kernel_file_ = "../biton.cl";
 
-  void sort(std::vector<int> &vec);
+        std::string src_code_;
 
-private:
-  BTS(void);
+        size_t work_group_size = 0;
 
-  bool load_src(const std::string &cl_fname);
-};
+    private:
+        BSort();
 
-#endif // __BITON_H__
+        bool build();
+
+        void Vec_preparing(std::vector<int>& vec, Dir dir);
+
+        bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size);
+
+    public:
+
+        BSort(BSort const &) = delete;
+        BSort &operator=(BSort const &) = delete;
+
+        static BSort& driver()
+        {
+            static BSort SignleTone{};
+            return SignleTone;
+        }
+
+        void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
+
+        void Device_selection(); //choose first suited platform and device
+    };
+
+
+    void bsort(std::vector<int>& vec, Dir dir);
+    const char *err_what(cl_int err_code);
+}
+
+#endif
