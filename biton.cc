@@ -167,7 +167,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     
     queue_.enqueueUnmapMemObject(buffer, mapped_vec);
 
-    std::cout << timer.elapsed() << " microseconds\n";
+    std::cout << "bsort time: "<< timer.elapsed() << " microseconds\n";
     vec.resize(old_vec_size);
 } /* End of 'sort_extended' function */
 
