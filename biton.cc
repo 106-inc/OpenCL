@@ -11,8 +11,10 @@ namespace BTS
  */
 void bsort(std::vector<int>& vec, Dir dir)
 {
+    BSort::driver().sort_extended(vec, dir);
+    /*
     BSort ctor{};
-    ctor.sort_extended(vec, dir);
+    ctor.sort_extended(vec, dir);*/
 } /* End of 'bsort' function */
 
 
@@ -82,6 +84,8 @@ bool BSort::build()
 
     simple_sort_ = cl::Kernel(prog_, "simple_sort");
     fast_sort_ = cl::Kernel(prog_, "fast_sort");
+
+    src.close();
 
     return true;
 } /* End of 'build' function */
@@ -180,7 +184,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //Getting sorted buf with help mapping cl::Buffer
     auto mapped_vec = static_cast<int*>(queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int)));
 
-    for (size_t i = 0; i < new_vec_size; i++)
+    for (size_t i = 0; i < new_vec_size; ++i)
         vec[i] = mapped_vec[i];
     
     queue_.enqueueUnmapMemObject(buffer, mapped_vec);

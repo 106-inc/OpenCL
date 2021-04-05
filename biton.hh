@@ -63,6 +63,8 @@ namespace BTS
         size_t work_group_size = 0;
 
     private:
+        BSort();
+
         bool build();
 
         void Vec_preparing(std::vector<int>& vec, Dir dir);
@@ -71,9 +73,14 @@ namespace BTS
 
     public:
 
-        BSort();
         BSort(BSort const &) = delete;
         BSort &operator=(BSort const &) = delete;
+
+        static BSort& driver()
+        {
+            static BSort SignleTone{};
+            return SignleTone;
+        }
 
         void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
 
