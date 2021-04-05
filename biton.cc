@@ -57,7 +57,7 @@ void BSort::Device_selection()
         }
     }
 
-    throw std::invalid_argument("No devices found");
+    throw std::invalid_argument("Devices didn't find!\n");
 }  /* End of 'Device_selection' function */
 
 
@@ -130,14 +130,21 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     Time::Timer timer;
 
     //! Setting args for execution fast_sort_
-    /*    */
-    fast_sort_.setArg(0, buffer);
-    fast_sort_.setArg(1, cur_pair);
-    fast_sort_.setArg(2, local);
-    fast_sort_.setArg(3, static_cast<unsigned>(dir));
+    try
+    {
+        fast_sort_.setArg(0, buffer);
+        fast_sort_.setArg(1, cur_pair);
+        fast_sort_.setArg(2, local);
+        fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
-    //! fast_sort_ execution
-    kernel_exec(fast_sort_, glob_size, loc_size);
+        //! fast_sort_ execution
+        kernel_exec(fast_sort_, glob_size, loc_size);
+    }
+    catch (cl::Error& err)
+    {
+        std::cerr << "Error occured in " << err.what() << std::endl;
+        std::cerr << err_what(err.err()) << std::endl;
+    }
 
 
     /* 
@@ -148,14 +155,24 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     {
         for (int passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
         {
-            //! Setting args for execution simple_sort_
-            simple_sort_.setArg(0, buffer);
-            simple_sort_.setArg(1, static_cast<unsigned>(cur_pair));
-            simple_sort_.setArg(2, static_cast<unsigned>(passed_pair));
-            simple_sort_.setArg(3, static_cast<unsigned>(dir));
+            try
+            {
+                //! Setting args for execution simple_sort_
+                simple_sort_.setArg(0, buffer);
+                simple_sort_.setArg(1, static_cast<unsigned>(cur_pair));
+                simple_sort_.setArg(2, static_cast<unsigned>(passed_pair));
+                simple_sort_.setArg(3, static_cast<unsigned>(dir));
+                
 
-            //! Same
-            kernel_exec(simple_sort_, glob_size, loc_size);
+                //! Same
+                kernel_exec(simple_sort_, glob_size, loc_size);
+            }
+
+            catch (cl::Error& err)
+            {
+                std::cerr << "Error occured in " << err.what() << std::endl;
+                std::cerr << err_what(err.err()) << std::endl;
+            }
         }
     }
 

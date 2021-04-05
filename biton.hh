@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <exception>
 
 /*****************************************/
 
@@ -15,7 +16,7 @@
 /****************************************/
 
 /* OpenCL library */
-
+#define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
 

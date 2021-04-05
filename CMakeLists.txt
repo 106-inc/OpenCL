@@ -19,7 +19,7 @@ set(WARN_OPTIONS
 
 find_package(OpenCL REQUIRED)
 
-add_executable(${EX_NAME} main.cc biton.cc)
+add_executable(${EX_NAME} main.cc biton.cc err_what.cc)
 
 # Specify standard
 target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
