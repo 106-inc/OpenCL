@@ -62,7 +62,7 @@ void BSort::Device_selection()
 
 
 /**
- * @brief 
+ * @brief build - helper function for constructor: creating any members of class
  * 
  * @return true 
  * @return false 
@@ -89,15 +89,14 @@ bool BSort::build()
 
 
 /**
- * @brief 
+ * @brief sort_extended - sort, which called by user in main
+ *        "extened" because it work not only with numbers is a power of two
  * 
  * @param vec 
  * @param dir 
  */
 void BSort::sort_extended(std::vector<int> &vec, Dir dir) 
-{   
-    Time::Timer timer;
-    
+{       
     //! Getting old size for resizing in future out vec
     size_t old_vec_size = vec.size();
 
@@ -128,8 +127,10 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
 
+    Time::Timer timer;
 
     //! Setting args for execution fast_sort_
+    /*    */
     fast_sort_.setArg(0, buffer);
     fast_sort_.setArg(1, cur_pair);
     fast_sort_.setArg(2, local);
@@ -138,6 +139,11 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! fast_sort_ execution
     kernel_exec(fast_sort_, glob_size, loc_size);
 
+
+    /* 
+       There is we sort pairs, which was skipped in fast_sort_,
+       because of work_grp > loc_ size
+    */
     for (; cur_pair < num_of_pairs; ++cur_pair) 
     {
         for (int passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
@@ -166,7 +172,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 } /* End of 'sort_extended' function */
 
 /**
- * @brief 
+ * @brief Hepler function for 'sort extended'
+ *        This function extend our vector to near number, which are power of a two
  * 
  * @param vec 
  * @param dir 
@@ -191,7 +198,7 @@ void BSort::Vec_preparing(std::vector<int>& vec, Dir dir)
 
 
 /**
- * @brief 
+ * @brief Function for execution kernel
  * 
  * @param kernel 
  * @param global_size 
