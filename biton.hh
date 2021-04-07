@@ -54,8 +54,6 @@ private:
   cl::Kernel simple_sort_;
   cl::Kernel fast_sort_;
 
-  std::string kernel_file_ = "../biton.cl";
-
   std::string src_code_;
 
   size_t work_group_size = 0;

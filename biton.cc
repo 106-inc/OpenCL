@@ -66,12 +66,9 @@ void BSort::Device_selection()
  */
 bool BSort::build()
 {
-  std::ifstream src(kernel_file_);
-
-  if (!src.is_open())
-    return false;
-
-  src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+  src_code_ = {
+    #include "biton.cl"
+  };
 
   sources_ = cl::Program::Sources(1, std::make_pair(src_code_.c_str(), src_code_.length() + 1));
 
@@ -80,8 +77,6 @@ bool BSort::build()
 
   simple_sort_ = cl::Kernel(prog_, "simple_sort");
   fast_sort_ = cl::Kernel(prog_, "fast_sort");
-
-  src.close();
 
   return true;
 } /* End of 'build' function */
