@@ -3,10 +3,10 @@
 
 /* Standard io libraries */
 #include <cmath>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <exception>
 
 /*****************************************/
 
@@ -18,7 +18,6 @@
 /* OpenCL library */
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
-
 
 /****************************************/
 
@@ -34,62 +33,59 @@
  * @brief OpenCL driver class
  *
  */
-namespace BTS 
+namespace BTS
 {
-    enum class Dir
-    {
-        DECR,
-        INCR
-    };
+enum class Dir
+{
+  DECR,
+  INCR
+};
 
+class BSort final
+{
+private:
+  cl::Context context_;
+  cl::Device device_;
 
-    class BSort final 
-    {
-    private:
-        cl::Context context_;
-        cl::Device device_;
+  cl::Program::Sources sources_;
+  cl::CommandQueue queue_;
+  cl::Program prog_;
 
-        cl::Program::Sources sources_;
-        cl::CommandQueue queue_;
-        cl::Program prog_;
+  cl::Kernel simple_sort_;
+  cl::Kernel fast_sort_;
 
-        cl::Kernel simple_sort_;
-        cl::Kernel fast_sort_;
+  std::string kernel_file_ = "../biton.cl";
 
-        std::string kernel_file_ = "../biton.cl";
+  std::string src_code_;
 
-        std::string src_code_;
+  size_t work_group_size = 0;
 
-        size_t work_group_size = 0;
+private:
+  BSort();
 
-    private:
-        BSort();
+  bool build();
 
-        bool build();
+  void Vec_preparing(std::vector<int> &vec, Dir dir);
 
-        void Vec_preparing(std::vector<int>& vec, Dir dir);
+  bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size);
 
-        bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size);
+public:
+  BSort(BSort const &) = delete;
+  BSort &operator=(BSort const &) = delete;
 
-    public:
+  static BSort &driver()
+  {
+    static BSort SignleTone{};
+    return SignleTone;
+  }
 
-        BSort(BSort const &) = delete;
-        BSort &operator=(BSort const &) = delete;
+  void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
 
-        static BSort& driver()
-        {
-            static BSort SignleTone{};
-            return SignleTone;
-        }
+  void Device_selection(); // choose first suited platform and device
+};
 
-        void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
-
-        void Device_selection(); //choose first suited platform and device
-    };
-
-
-    void bsort(std::vector<int>& vec, Dir dir);
-    const char *err_what(cl_int err_code);
-}
+void bsort(std::vector<int> &vec, Dir dir);
+const char *err_what(cl_int err_code);
+} // namespace BTS
 
 #endif
