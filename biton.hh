@@ -17,7 +17,7 @@
 
 /* OpenCL library */
 #define __CL_ENABLE_EXCEPTIONS
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 
 /****************************************/
 
@@ -73,8 +73,8 @@ public:
 
   static BSort &driver()
   {
-    static BSort SignleTone{};
-    return SignleTone;
+    static BSort SingleTone{};
+    return SingleTone;
   }
 
   void sort_extended(std::vector<int> &vec, Dir dir = Dir::INCR);
