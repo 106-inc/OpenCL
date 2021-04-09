@@ -2,11 +2,11 @@ R"(
 /**
  * simple_sort - its kernel - simple realisation bitonic sort without local memory
  */
-__kernel void simple_sort(__global int * vec, uint cur_pair, uint passed_pair, uint dir)
+__kernel void simple_sort(__global int * vec, uint cur_stage, uint passed_stage, uint dir)
 {
     uint id = get_global_id(0);
     
-    uint pair_distance = 1 << (cur_pair - passed_pair);
+    uint pair_distance = 1 << (cur_stage - passed_stage);
 
     uint left_id = (id % pair_distance) + (id / pair_distance) * 2 * pair_distance;
     uint right_id = left_id + pair_distance;
@@ -14,7 +14,7 @@ __kernel void simple_sort(__global int * vec, uint cur_pair, uint passed_pair, u
     int left_elem = vec[left_id];
     int right_elem = vec[right_id];
     
-    if (( id / (1 << cur_pair)) % 2 == 1 )
+    if (( id / (1 << cur_stage)) % 2 == 1 )
         dir = 1 - dir;
 
     int greater = (left_elem > right_elem) ? left_elem : right_elem;
@@ -29,10 +29,10 @@ __kernel void simple_sort(__global int * vec, uint cur_pair, uint passed_pair, u
 /**
  * fast_sort - it's kernel - simple realisation bitonic sort with local memory
  */
-__kernel void fast_sort(__global int* vec, uint cur_pair, __local int* local_data, uint direction) 
+__kernel void fast_sort(__global int* vec, uint cur_stage, __local int* local_data, uint direction) 
 {
     
-    //initializing data for allocation memory
+    //! Initializing data for allocation memory
     uint local_id  = get_local_id(0);
     uint dir = direction;
     uint group_size = get_local_size(0);
@@ -49,7 +49,7 @@ __kernel void fast_sort(__global int* vec, uint cur_pair, __local int* local_dat
 
     //! There is we use simple sort from top "biton.cl"
     //! Compare two elems and swap it or skip
-    for(uint pair = 0; pair < cur_pair; ++pair) 
+    for(uint pair = 0; pair < cur_stage; ++pair) 
     {
         for(uint pair_passed = 0; pair_passed < pair + 1; ++pair_passed) 
         {
