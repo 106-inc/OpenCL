@@ -120,9 +120,9 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     queue_.enqueueWriteBuffer(buffer, CL_TRUE, 0, sizeof(int) * vec.size(), vec.data());
 
     //! Getting number of pairs of our resized vector
-    int num_of_pairs = std::ceil(std::log2(new_vec_size));
+    uint num_of_pairs = std::ceil(std::log2(new_vec_size));
 
-    int cur_pair = std::log2(loc_size);
+    uint cur_pair = std::log2(loc_size);
 
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
@@ -154,14 +154,14 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     */
     for (; cur_pair < num_of_pairs; ++cur_pair) 
     {
-        for (int passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
+        for (uint passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
         {
             try
             {
                 //! Setting args for execution simple_sort_
                 simple_sort_.setArg(0, buffer);
-                simple_sort_.setArg(1, static_cast<unsigned>(cur_pair));
-                simple_sort_.setArg(2, static_cast<unsigned>(passed_pair));
+                simple_sort_.setArg(1, cur_pair);
+                simple_sort_.setArg(2, passed_pair);
                 simple_sort_.setArg(3, static_cast<unsigned>(dir));
                 
 
@@ -179,12 +179,17 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     }
 
     //Getting sorted buf with help mapping cl::Buffer
+
+    
+
+    /*
     auto mapped_vec = static_cast<int*>(queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int)));
 
     for (size_t i = 0; i < new_vec_size; ++i)
         vec[i] = mapped_vec[i];
     
     queue_.enqueueUnmapMemObject(buffer, mapped_vec);
+    */
 
     std::cout << "bsort time: "<< timer.elapsed() << " microseconds\n";
     vec.resize(old_vec_size);
