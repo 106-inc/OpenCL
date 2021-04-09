@@ -121,6 +121,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
 
+    cl::Event event; 
+
 #if TIME
     Time::Timer timer_gpu;
 #endif
@@ -134,7 +136,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
         //! fast_sort_ execution
-        if (!kernel_exec(fast_sort_, glob_size, loc_size))
+        if (!kernel_exec(fast_sort_, glob_size, loc_size, event))
             throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
     }
     catch (cl::Error& err)
@@ -162,7 +164,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
                 
 
                 //! Same
-                if (!kernel_exec(simple_sort_, glob_size, loc_size))
+                if (!kernel_exec(simple_sort_, glob_size, loc_size, event))
                     throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
             }
 
@@ -173,7 +175,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
             }
         }
     }
-
+    event.wait();
     //Getting sorted buf with help mapping cl::Buffer
 
     cl::copy(queue_, buffer, vec.begin(), vec.end());
@@ -215,15 +217,13 @@ void BSort::Vec_preparing(std::vector<int> &vec, Dir dir)
  * @return true
  * @return false
  */
-bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size)
+bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, cl::Event& event)
 {
-  cl::Event event;
   int err_num = queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size, nullptr, &event);
 
   if (err_num != CL_SUCCESS)
     return false;
 
-  event.wait();
   return true;
 } /* End of 'kernel_exec' function*/
 
