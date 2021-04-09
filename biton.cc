@@ -25,6 +25,7 @@ BSort::BSort()
 {
   Device_selection();
 
+  //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
   work_group_size = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
   context_ = cl::Context{device_};
@@ -99,9 +100,6 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     Vec_preparing(vec, dir);
     size_t new_vec_size = vec.size();
 
-    //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
-    size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
-
     //! global_size <=> number of work-items that I wish to execute
     //! vec.size() / 2 cause work item shall compare two elems
     size_t glob_size = vec.size() / 2;
@@ -109,7 +107,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! local_size <=> number of work-items that I wish to group into a work-group
     //! size of loc_size should be less or equal work_group
     //! This is the reason of comparing elems on this distance
-    size_t loc_size = std::min(glob_size, work_grp_sze);
+    size_t loc_size = std::min(glob_size, work_group_size);
 
     //! Creating special buffer for working with glod memory in kernel
     cl::Buffer buffer(context_, CL_MEM_READ_WRITE, sizeof(int) * vec.size());
