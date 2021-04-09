@@ -26,7 +26,7 @@ BSort::BSort()
     work_group_size = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
     context_ = cl::Context({device_});
-    queue_ = cl::CommandQueue(context_, device_);
+    queue_ = cl::CommandQueue{context_, device_,CL_QUEUE_PROFILING_ENABLE};
 
     if (!build())
         throw std::runtime_error{"Building of program wasn't sucsessful!\n"};
@@ -74,7 +74,10 @@ bool BSort::build()
 
     src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
 
-    sources_ = cl::Program::Sources(1, std::make_pair(src_code_.c_str(), src_code_.length() + 1));
+    //sources_ = cl::Program::Sources(1, std::make_pair(src_code_.c_str(), src_code_.length() + 1));
+    //sources_ = cl::Program::Sources(src_code_);
+
+    sources_ = cl::Program::Sources{src_code_};
 
     prog_ = cl::Program(context_, sources_);
     prog_.build();
@@ -108,6 +111,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
     //! global_size <=> number of work-items that I wish to execute
+    //! vec.size() / 2 cause work item shall compare two elems
     size_t glob_size = vec.size() / 2;
 
     //! local_size <=> number of work-items that I wish to group into a work-group
@@ -122,7 +126,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Getting number of pairs of our resized vector
     uint num_of_pairs = std::ceil(std::log2(new_vec_size));
 
-    uint cur_pair = std::log2(loc_size);
+    uint cur_stage = std::log2(loc_size);
 
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
@@ -133,7 +137,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     try
     {
         fast_sort_.setArg(0, buffer);
-        fast_sort_.setArg(1, cur_pair);
+        fast_sort_.setArg(1, cur_stage);
         fast_sort_.setArg(2, local);
         fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
@@ -147,21 +151,21 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         std::cerr << err_what(err.err()) << std::endl;
     }
 
-
     /* 
-       There is we sort pairs, which was skipped in fast_sort_,
+       There is we process all stages, which was skipped in fast_sort_,
        because of work_grp > loc_ size
     */
-    for (; cur_pair < num_of_pairs; ++cur_pair) 
+
+    for (; cur_stage < num_of_pairs; ++cur_stage) 
     {
-        for (uint passed_pair = 0; passed_pair < cur_pair + 1; ++passed_pair) 
+        for (uint passed_stage = 0; passed_stage < cur_stage + 1; ++passed_stage) 
         {
             try
             {
                 //! Setting args for execution simple_sort_
                 simple_sort_.setArg(0, buffer);
-                simple_sort_.setArg(1, cur_pair);
-                simple_sort_.setArg(2, passed_pair);
+                simple_sort_.setArg(1, cur_stage);
+                simple_sort_.setArg(2, passed_stage);
                 simple_sort_.setArg(3, static_cast<unsigned>(dir));
                 
 
@@ -180,16 +184,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 
     //Getting sorted buf with help mapping cl::Buffer
 
-    
-
-    /*
-    auto mapped_vec = static_cast<int*>(queue_.enqueueMapBuffer(buffer, CL_TRUE, CL_MAP_READ, 0, new_vec_size * sizeof(int)));
-
-    for (size_t i = 0; i < new_vec_size; ++i)
-        vec[i] = mapped_vec[i];
-    
-    queue_.enqueueUnmapMemObject(buffer, mapped_vec);
-    */
+    cl::copy(queue_, buffer, vec.begin(), vec.end());
 
     std::cout << "bsort time: "<< timer.elapsed() << " microseconds\n";
     vec.resize(old_vec_size);
