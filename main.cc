@@ -27,15 +27,23 @@ int main()
 
   std::vector<int> comp_vec{vec};
 
-#if 0
-    Time::Timer timer; 
+#if CORRECT
     std::sort(comp_vec.begin(), comp_vec.end());
-    std::cout << "std::sort(...) time: " << timer.elapsed() << " microseconds\n";
 #endif
 
   try
   {
+
+#if TIME
+    Time::Timer all_time;
+#endif
+
     BTS::bsort(vec, BTS::Dir::INCR);
+
+#if TIME
+    std::cout << "bsort all time: "<< all_time.elapsed() << " microseconds\n";
+#endif
+
 
     for (size_t i = 0; i < vec_size; ++i)
       std::cout << vec[i] << " ";
@@ -48,7 +56,7 @@ int main()
     return -1;
   }
 
-#if 0
+#if CORRECT
     std::cout << std::endl;
 
     if (vec == comp_vec)

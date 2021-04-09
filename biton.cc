@@ -121,7 +121,9 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
 
-    Time::Timer timer;
+#if TIME
+    Time::Timer timer_gpu;
+#endif
 
     //! Setting args for execution fast_sort_
     try
@@ -176,7 +178,10 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 
     cl::copy(queue_, buffer, vec.begin(), vec.end());
 
-    std::cout << "bsort time: "<< timer.elapsed() << " microseconds\n";
+#if TIME
+    std::cout << "bsort gpu_time: "<< timer_gpu.elapsed() << " microseconds\n";
+#endif
+
     vec.resize(old_vec_size);
 } /* End of 'sort_extended' function */
 
