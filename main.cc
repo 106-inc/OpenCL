@@ -28,7 +28,7 @@ int main()
   std::vector<int> comp_vec{vec};
 
 #if CORRECT
-    std::sort(comp_vec.begin(), comp_vec.end());
+  std::sort(comp_vec.begin(), comp_vec.end());
 #endif // CORRECT
 
   try
@@ -41,7 +41,7 @@ int main()
     BTS::bsort(vec, BTS::Dir::INCR);
 
 #if TIME
-    std::cout << "bsort all time: "<< all_time.elapsed() << " microseconds\n";
+    std::cout << "bsort all time: " << all_time.elapsed() << " microseconds\n";
 #endif // TIME
 
 #if CORRECT
@@ -50,7 +50,6 @@ int main()
 
     std::cout << std::endl;
 #endif // CORRECT
-
   }
   catch (std::exception &err)
   {
@@ -59,17 +58,17 @@ int main()
   }
 
 #if CORRECT
-    std::cout << std::endl;
+  std::cout << std::endl;
 
-    if (vec == comp_vec)
-    {
-        std::cout << "Sortion was succesful!\n";
-        return 0;
-    }
-    else 
-    {
-        std::cout << "Sortion wasn't succesful!\n";
-        return -1;
-    }
+  if (vec == comp_vec)
+  {
+    std::cout << "Sortion was succesful!\n";
+    return 0;
+  }
+  else
+  {
+    std::cout << "Sortion wasn't succesful!\n";
+    return -1;
+  }
 #endif // CORRECT
 }
