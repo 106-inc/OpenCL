@@ -83,6 +83,7 @@ bool BSort::build()
   {
       std::cerr << error.what() << std::endl;
       std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_) << std::endl;
+      return false; 
   }
 
   simple_sort_ = cl::Kernel(prog_, "simple_sort");
