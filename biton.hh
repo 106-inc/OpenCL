@@ -17,6 +17,7 @@
 
 /* OpenCL library */
 #define __CL_ENABLE_EXCEPTIONS
+
 #include <CL/cl2.hpp>
 
 /****************************************/
@@ -65,7 +66,10 @@ private:
 
   void Vec_preparing(std::vector<int> &vec, Dir dir);
 
-  bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, cl::Event& event, cl_ulong* time);
+  bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, std::vector<cl::Event>& events);
+
+  void gpu_timing(std::vector<cl::Event>& events,  cl_ulong* time);
+
 
 public:
   BSort(BSort const &) = delete;
