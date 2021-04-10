@@ -16,8 +16,6 @@
 /****************************************/
 
 /* OpenCL library */
-#define __CL_ENABLE_EXCEPTIONS
-
 #include <CL/cl2.hpp>
 
 /****************************************/

@@ -11,10 +11,7 @@ namespace BTS
  */
 void bsort(std::vector<int> &vec, Dir dir)
 {
-  BSort::driver().sort_extended(vec, dir);
-  /*
-  BSort ctor{};
-  ctor.sort_extended(vec, dir);*/
+    BSort::driver().sort_extended(vec, dir);
 } /* End of 'bsort' function */
 
 /**
@@ -154,6 +151,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         std::cerr << err_what(err.err()) << std::endl;
     }
 
+
     events[0].wait();
 
     gpu_timing(events, &gpu_time);
@@ -162,7 +160,9 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
        There is we process all stages, which was skipped in fast_sort_,
        because of work_grp > loc_ size
     */
+
     events.clear();
+
 
     for (; cur_stage < num_of_pairs; ++cur_stage) 
     {
@@ -194,6 +194,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     for (auto&& evnt : events)
         evnt.wait();
     //Getting sorted buf with help mapping cl::Buffer
+
     gpu_timing(events, &gpu_time);
 
     cl::copy(queue_, buffer, vec.begin(), vec.end());
