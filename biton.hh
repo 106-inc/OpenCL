@@ -65,7 +65,7 @@ private:
 
   void Vec_preparing(std::vector<int> &vec, Dir dir);
 
-  bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size);
+  bool kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, cl::Event& event, cl_ulong* time);
 
 public:
   BSort(BSort const &) = delete;

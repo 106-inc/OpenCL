@@ -44,7 +44,7 @@ int main()
     std::cout << "bsort all time: "<< all_time.elapsed() << " microseconds\n";
 #endif
 
-
+ 
     for (size_t i = 0; i < vec_size; ++i)
       std::cout << vec[i] << " ";
 

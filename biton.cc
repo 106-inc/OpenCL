@@ -133,9 +133,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
 
     cl::Event event; 
 
-#if TIME
-    Time::Timer timer_gpu;
-#endif
+    cl_ulong gpu_time = 0;
 
     //! Setting args for execution fast_sort_
     try
@@ -146,8 +144,10 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
         //! fast_sort_ execution
-        if (!kernel_exec(fast_sort_, glob_size, loc_size, event))
+        if (!kernel_exec(fast_sort_, glob_size, loc_size, event, &gpu_time))
             throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
+        
+        event.wait();
     }
     catch (cl::Error& err)
     {
@@ -174,7 +174,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
                 
 
                 //! Same
-                if (!kernel_exec(simple_sort_, glob_size, loc_size, event))
+                if (!kernel_exec(simple_sort_, glob_size, loc_size, event, &gpu_time))
                     throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
             }
 
@@ -191,7 +191,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     cl::copy(queue_, buffer, vec.begin(), vec.end());
 
 #if TIME
-    std::cout << "bsort gpu_time: "<< timer_gpu.elapsed() << " microseconds\n";
+    std::cout << "bsort gpu_time: "<< gpu_time << " nanosecs\n";
 #endif
 
     vec.resize(old_vec_size);
@@ -227,12 +227,19 @@ void BSort::Vec_preparing(std::vector<int> &vec, Dir dir)
  * @return true
  * @return false
  */
-bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, cl::Event& event)
+bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, cl::Event& event, cl_ulong* time)
 {
   int err_num = queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size, nullptr, &event);
 
   if (err_num != CL_SUCCESS)
     return false;
+
+#if TIME
+  auto start = event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+  auto end =   event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+
+  *time += end - start;
+#endif
 
   return true;
 } /* End of 'kernel_exec' function*/
