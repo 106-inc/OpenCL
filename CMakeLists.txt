@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(bitonic)
+project(bsort)
 
-set(EX_NAME ${PROJECT_NAME}.o)
+set(CORRECT_VERS ${PROJECT_NAME}.o)
+set(TIME_VERS ${PROJECT_NAME}_time.o)
 
 # option for debug (debug info)
 set(PR_DEBUG_OPTIONS -g)
@@ -19,22 +20,34 @@ set(WARN_OPTIONS
 
 find_package(OpenCL REQUIRED)
 
-add_executable(${EX_NAME} main.cc biton.cc err_what.cc)
+add_executable(${CORRECT_VERS} main.cc biton.cc err_what.cc)
 
-# Specify standard
-target_compile_features(${EX_NAME} PRIVATE cxx_std_20)
+add_executable(${TIME_VERS} main.cc biton.cc err_what.cc)
 
-# Specify warning options
-target_compile_options(${EX_NAME} PRIVATE ${WARN_OPTIONS})
+set(TARGETS ${CORRECT_VERS} ${TIME_VERS})
 
-# Required libraries
-target_link_libraries(${EX_NAME} OpenCL)
 
-# Specify compiler options fro debug and release
-target_compile_options(${EX_NAME} PRIVATE "$<$<CONFIG:DEBUG>:${PR_DEBUG_OPTIONS}>")
-target_compile_options(${EX_NAME} PRIVATE "$<$<CONFIG:RELEASE>:${PR_RELEASE_OPTIONS}>")
+foreach (T_NAME ${TARGETS})
+  # Specify standard
+  target_compile_features(${T_NAME} PRIVATE cxx_std_20)
 
-target_compile_definitions(${EX_NAME} PRIVATE
-  CL_HPP_ENABLE_EXCEPTIONS
-  CL_HPP_TARGET_OPENCL_VERSION=210
-)
+  # Specify warning options
+  target_compile_options(${T_NAME} PRIVATE ${WARN_OPTIONS})
+
+  # Required libraries
+  target_link_libraries(${T_NAME} OpenCL)
+
+  # Specify compiler options fro debug and release
+  target_compile_options(${T_NAME} PRIVATE "$<$<CONFIG:DEBUG>:${PR_DEBUG_OPTIONS}>")
+  target_compile_options(${T_NAME} PRIVATE "$<$<CONFIG:RELEASE>:${PR_RELEASE_OPTIONS}>")
+  target_compile_definitions(${T_NAME} PRIVATE CL_HPP_ENABLE_EXCEPTIONS
+                                               CL_HPP_TARGET_OPENCL_VERSION=210)
+
+endforeach()
+
+target_compile_definitions(${CORRECT_VERS} PRIVATE CORRECT)
+
+target_compile_definitions(${TIME_VERS} PRIVATE TIME)
+
+
+

@@ -1,19 +1,18 @@
 #include "biton.hh"
 
-namespace BTS 
+namespace BTS
 {
 
 /**
- * @brief 
- * 
- * @param vec 
- * @param dir 
+ * @brief
+ *
+ * @param vec
+ * @param dir
  */
-void bsort(std::vector<int>& vec, Dir dir)
+void bsort(std::vector<int> &vec, Dir dir)
 {
     BSort::driver().sort_extended(vec, dir);
 } /* End of 'bsort' function */
-
 
 /**
  * @brief Construct a new BSort::BSort object function
@@ -21,82 +20,83 @@ void bsort(std::vector<int>& vec, Dir dir)
  */
 BSort::BSort()
 {
-    Device_selection();
+  Device_selection();
 
-    work_group_size = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+  //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
+  work_group_size = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
 
-    context_ = cl::Context({device_});
-    queue_ = cl::CommandQueue{context_, device_,CL_QUEUE_PROFILING_ENABLE};
+  context_ = cl::Context{device_};
+  queue_ = cl::CommandQueue{context_, device_, CL_QUEUE_PROFILING_ENABLE};
 
-    if (!build())
-        throw std::runtime_error{"Building of program wasn't sucsessful!\n"};
+  if (!build())
+    throw std::runtime_error{"Building of program wasn't sucsessful!\n"};
 } /* End of 'BSort' function */
-
-
 
 /**
  * @brief Function for selecting gpu-device
  */
-void BSort::Device_selection() 
+void BSort::Device_selection()
 {
-    std::vector<cl::Platform> pls;
-    cl::Platform::get(&pls);
+  std::vector<cl::Platform> pls;
+  cl::Platform::get(&pls);
 
-    for (auto &&pl_devs : pls)
-    {
-        std::vector<cl::Device> devs;
-        pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
+  for (auto &&pl_devs : pls)
+  {
+    std::vector<cl::Device> devs;
+    pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
 
-        for (auto &&dev : devs)
-        if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
-        {
-            device_ = dev;
-            return;
-        }
-    }
+    for (auto &&dev : devs)
+      if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+      {
+        device_ = dev;
+        return;
+      }
+  }
 
-    throw std::runtime_error("Devices didn't find!\n");
-}  /* End of 'Device_selection' function */
-
+  throw std::runtime_error("Devices didn't find!\n");
+} /* End of 'Device_selection' function */
 
 /**
  * @brief build - helper function for constructor: creating any members of class
- * 
- * @return true 
- * @return false 
+ *
+ * @return true
+ * @return false
  */
 bool BSort::build()
-{   
-    std::ifstream src(kernel_file_);
+{
+  src_code_ = {
+    #include "biton.cl"
+  };
 
-    if (!src.is_open())
-    return false;
+  sources_ = cl::Program::Sources{src_code_};
 
-    src_code_ = {std::istreambuf_iterator<char>(src), std::istreambuf_iterator<char>()};
+  prog_ = cl::Program(context_, sources_);
 
-    //sources_ = cl::Program::Sources(1, std::make_pair(src_code_.c_str(), src_code_.length() + 1));
-    //sources_ = cl::Program::Sources(src_code_);
-
-    sources_ = cl::Program::Sources{src_code_};
-
-    prog_ = cl::Program(context_, sources_);
+  try
+  {
     prog_.build();
+  }
+  catch(cl::Error &error)
+  {
+      std::cerr << error.what() << std::endl;
+      std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_) << std::endl;
+      return false; 
+  }
 
-    simple_sort_ = cl::Kernel(prog_, "simple_sort");
-    fast_sort_ = cl::Kernel(prog_, "fast_sort");
+  simple_sort_ = cl::Kernel(prog_, "simple_sort");
+  fast_sort_ = cl::Kernel(prog_, "fast_sort");
 
-    src.close();
-
-    return true;
+  return true;
 } /* End of 'build' function */
+
 
 
 /**
  * @brief sort_extended - sort, which called by user in main
  *        "extened" because it work not only with numbers is a power of two
- * 
- * @param vec 
- * @param dir 
+ *
+ * @param vec
+ * @param dir
  */
 void BSort::sort_extended(std::vector<int> &vec, Dir dir) 
 {       
@@ -107,9 +107,6 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     Vec_preparing(vec, dir);
     size_t new_vec_size = vec.size();
 
-    //! Getting the size of the ND range space that can be handled by a single invocation of a kernel compute unit. 
-    size_t work_grp_sze = device_.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
-
     //! global_size <=> number of work-items that I wish to execute
     //! vec.size() / 2 cause work item shall compare two elems
     size_t glob_size = vec.size() / 2;
@@ -117,7 +114,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! local_size <=> number of work-items that I wish to group into a work-group
     //! size of loc_size should be less or equal work_group
     //! This is the reason of comparing elems on this distance
-    size_t loc_size = std::min(glob_size, work_grp_sze);
+    size_t loc_size = std::min(glob_size, work_group_size);
 
     //! Creating special buffer for working with glod memory in kernel
     cl::Buffer buffer(context_, CL_MEM_READ_WRITE, sizeof(int) * vec.size());
@@ -131,7 +128,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
     //! Allocation local memory for working in fast_sort_
     cl::LocalSpaceArg local = cl::Local(2 * loc_size * sizeof(int));
 
-    Time::Timer timer;
+    cl_ulong gpu_time = 0;
+    std::vector<cl::Event> events; 
 
     //! Setting args for execution fast_sort_
     try
@@ -142,8 +140,10 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         fast_sort_.setArg(3, static_cast<unsigned>(dir));
 
         //! fast_sort_ execution
-        if (!kernel_exec(fast_sort_, glob_size, loc_size))
+        if (!kernel_exec(fast_sort_, glob_size, loc_size, events))
             throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
+        
+        //event.wait();
     }
     catch (cl::Error& err)
     {
@@ -151,15 +151,24 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         std::cerr << err_what(err.err()) << std::endl;
     }
 
+
+    events[0].wait();
+
+    gpu_timing(events, &gpu_time);
+
     /* 
        There is we process all stages, which was skipped in fast_sort_,
        because of work_grp > loc_ size
     */
 
+    events.clear();
+
+
     for (; cur_stage < num_of_pairs; ++cur_stage) 
     {
         for (uint passed_stage = 0; passed_stage < cur_stage + 1; ++passed_stage) 
         {
+            //cl::Event event_simple;
             try
             {
                 //! Setting args for execution simple_sort_
@@ -170,7 +179,7 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
                 
 
                 //! Same
-                if (!kernel_exec(simple_sort_, glob_size, loc_size))
+                if (!kernel_exec(simple_sort_, glob_size, loc_size, events))
                     throw std::runtime_error{"Execution of simple_sort wasn't sucsessful!\n"};
             }
 
@@ -182,65 +191,78 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
         }
     }
 
+    for (auto&& evnt : events)
+        evnt.wait();
     //Getting sorted buf with help mapping cl::Buffer
+
+    gpu_timing(events, &gpu_time);
 
     cl::copy(queue_, buffer, vec.begin(), vec.end());
 
-    std::cout << "bsort time: "<< timer.elapsed() << " microseconds\n";
+#if TIME
+    std::cout << "bsort gpu_time: "<< gpu_time << " microsecs\n";
+#endif
+
     vec.resize(old_vec_size);
 } /* End of 'sort_extended' function */
-
-
 
 /**
  * @brief Hepler function for 'sort extended'
  *        This function extend our vector to near number, which are power of a two
- * 
- * @param vec 
- * @param dir 
+ *
+ * @param vec
+ * @param dir
  */
-void BSort::Vec_preparing(std::vector<int>& vec, Dir dir)
+void BSort::Vec_preparing(std::vector<int> &vec, Dir dir)
 {
-    size_t old_vec_size = vec.size();
-    size_t new_vec_size = std::pow(2,1 + static_cast<int>(log2(old_vec_size)));
+  int num_for_fill = dir == Dir::INCR ? std::numeric_limits<int>::max() : std::numeric_limits<int>::min();
 
-    int num_for_fill = 0;
-    
-    if (dir == Dir::INCR)
-        num_for_fill = std::numeric_limits<int>::max();
+  size_t old_vs = vec.size();
+  size_t new_vs = std::pow(2, 1 + static_cast<int>(log2(old_vs)));
 
-    else
-        num_for_fill = std::numeric_limits<int>::min();
+  vec.resize(new_vs);
+  auto vb = vec.begin();
+  std::fill(vb + old_vs, vb + new_vs, num_for_fill);
 
-    vec.reserve(new_vec_size);
-
-    for (size_t i = old_vec_size; i < new_vec_size; ++i)
-        vec.push_back(num_for_fill);
 } /* End of 'Vec_preparing' function*/
-
 
 
 /**
  * @brief Function for execution kernel
- * 
- * @param kernel 
- * @param global_size 
- * @param local_size 
- * @return true 
- * @return false 
+ *
+ * @param kernel
+ * @param global_size
+ * @param local_size
+ * @return true
+ * @return false
  */
-bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size)
+bool BSort::kernel_exec(cl::Kernel kernel, size_t global_size, size_t local_size, std::vector<cl::Event>& events)
 {
-    cl::Event event;
-    int err_num = queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size, nullptr, &event);
+  cl::Event event;
 
-    if (err_num != CL_SUCCESS)
-        return false;
+  int err_num = queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size, nullptr, &event);
 
-    event.wait();
-    return true;
+  if (err_num != CL_SUCCESS)
+    return false;
+
+  events.push_back(event);
+
+  return true;
 } /* End of 'kernel_exec' function*/
 
 
-} 
+void BSort::gpu_timing(std::vector<cl::Event>& events,  cl_ulong* time)
+{
+  #if TIME
 
+    for (auto&& evnt : events)
+    {
+      auto start = evnt.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+      auto end =   evnt.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+      auto microsecs = (end - start) / 1000; 
+      *time += microsecs;
+    }
+#endif
+}
+
+} // namespace BTS

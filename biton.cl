@@ -1,3 +1,4 @@
+R"(
 /**
  * simple_sort - its kernel - simple realisation bitonic sort without local memory
  */
@@ -86,3 +87,4 @@ __kernel void fast_sort(__global int* vec, uint cur_stage, __local int* local_da
     vec[offset * 2 + local_id] = local_data[local_id];
     vec[offset * 2 + local_id + group_size] = local_data[local_id + group_size];
 }
+)"
