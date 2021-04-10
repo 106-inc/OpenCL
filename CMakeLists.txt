@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(bitonic_time)
+project(bsort)
 
-set(CORRECT_VERS ${PROJECT_NAME}.cor)
-set(TIME_VERS ${PROJECT_NAME}.time)
+set(CORRECT_VERS ${PROJECT_NAME}.o)
+set(TIME_VERS ${PROJECT_NAME}_time.o)
 
 # option for debug (debug info)
 set(PR_DEBUG_OPTIONS -g)
@@ -45,17 +45,9 @@ foreach (T_NAME ${TARGETS})
 
 endforeach()
 
-target_compile_definitions(${CORRECT_VERS} PRIVATE
-  CL_HPP_ENABLE_EXCEPTIONS
-  CL_HPP_TARGET_OPENCL_VERSION=210
-  CORRECT
-)
+target_compile_definitions(${CORRECT_VERS} PRIVATE CORRECT)
 
-target_compile_definitions(${TIME_VERS} PRIVATE
-  CL_HPP_ENABLE_EXCEPTIONS
-  CL_HPP_TARGET_OPENCL_VERSION=210
-  TIME
-)
+target_compile_definitions(${TIME_VERS} PRIVATE TIME)
 
 
 
