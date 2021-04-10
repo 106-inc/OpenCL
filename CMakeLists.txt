@@ -40,6 +40,8 @@ foreach (T_NAME ${TARGETS})
   # Specify compiler options fro debug and release
   target_compile_options(${T_NAME} PRIVATE "$<$<CONFIG:DEBUG>:${PR_DEBUG_OPTIONS}>")
   target_compile_options(${T_NAME} PRIVATE "$<$<CONFIG:RELEASE>:${PR_RELEASE_OPTIONS}>")
+  target_compile_definitions(${T_NAME} PRIVATE CL_HPP_ENABLE_EXCEPTIONS
+                                               CL_HPP_TARGET_OPENCL_VERSION=210)
 
 endforeach()
 

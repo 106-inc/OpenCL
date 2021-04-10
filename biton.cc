@@ -74,7 +74,16 @@ bool BSort::build()
   sources_ = cl::Program::Sources{src_code_};
 
   prog_ = cl::Program(context_, sources_);
-  prog_.build();
+
+  try
+  {
+    prog_.build();
+  }
+  catch(cl::Error &error)
+  {
+      std::cerr << error.what() << std::endl;
+      std::cerr << prog_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_) << std::endl;
+  }
 
   simple_sort_ = cl::Kernel(prog_, "simple_sort");
   fast_sort_ = cl::Kernel(prog_, "fast_sort");
@@ -174,8 +183,8 @@ void BSort::sort_extended(std::vector<int> &vec, Dir dir)
                 std::cerr << err_what(err.err()) << std::endl;
             }
         }
+        event.wait();
     }
-    event.wait();
     //Getting sorted buf with help mapping cl::Buffer
 
     cl::copy(queue_, buffer, vec.begin(), vec.end());
