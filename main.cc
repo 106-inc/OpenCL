@@ -29,26 +29,28 @@ int main()
 
 #if CORRECT
     std::sort(comp_vec.begin(), comp_vec.end());
-#endif
+#endif // CORRECT
 
   try
   {
 
 #if TIME
     Time::Timer all_time;
-#endif
+#endif // TIME
 
     BTS::bsort(vec, BTS::Dir::INCR);
 
 #if TIME
     std::cout << "bsort all time: "<< all_time.elapsed() << " microseconds\n";
-#endif
+#endif // TIME
 
- 
+#if CORRECT
     for (size_t i = 0; i < vec_size; ++i)
       std::cout << vec[i] << " ";
 
     std::cout << std::endl;
+#endif // CORRECT
+
   }
   catch (std::exception &err)
   {
@@ -69,5 +71,5 @@ int main()
         std::cout << "Sortion wasn't succesful!\n";
         return -1;
     }
-#endif
+#endif // CORRECT
 }
