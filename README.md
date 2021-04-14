@@ -5,7 +5,7 @@
 
 |Current level|
 |:-:|
-|1|
+|2|
 
 You should do before using:
 ```bash
