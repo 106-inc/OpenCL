@@ -40,7 +40,7 @@ enum class Dir
   INCR
 };
 
-class BSort final
+class BSort
 {
 private:
   cl::Context context_;
