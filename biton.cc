@@ -45,12 +45,20 @@ void BSort::Device_selection()
     std::vector<cl::Device> devs;
     pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
 
-    for (auto &&dev : devs)
-      if (dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>())
+    auto dev_it = std::find_if(
+      devs.begin(), devs.end(), 
+      [](const cl::Device & dev)
       {
-        device_ = dev;
-        return;
+        return dev.getInfo<CL_DEVICE_AVAILABLE>() && 
+               dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>();
       }
+    );
+
+    if (dev_it != devs.end())
+    {
+      device_ = *dev_it;
+      return;
+    }
   }
 
   throw std::runtime_error("Devices didn't find!\n");
