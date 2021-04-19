@@ -45,9 +45,8 @@ void BSort::Device_selection()
     std::vector<cl::Device> devs;
     pl_devs.getDevices(CL_DEVICE_TYPE_GPU, &devs);
 
-    auto pred = [](const cl::Device & dev){
-    return dev.getInfo<CL_DEVICE_AVAILABLE>() && 
-           dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>();
+    auto pred = [](const cl::Device &dev) {
+      return dev.getInfo<CL_DEVICE_AVAILABLE>() && dev.getInfo<CL_DEVICE_COMPILER_AVAILABLE>();
     };
 
     auto dev_it = std::find_if(devs.begin(), devs.end(), pred);
